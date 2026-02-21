@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
+import { generateFactualAnchors } from '../../services/remediationService';
 
-// In-memory rate limiter (inlined for serverless; per-instance only)
 const rateLimitStore = new Map<string, number[]>();
 const RATE_WINDOW_MS = 60 * 1000;
 const RATE_MAX_REQUESTS = 10;
@@ -26,51 +26,29 @@ function getIdentifier(req: VercelRequest): string {
   return (req as any).socket?.remoteAddress ?? 'unknown';
 }
 
-import { generateFactualAnchors } from '../services/remediationService';
-
-export default async function handler(
-  req: VercelRequest,
-  res: VercelResponse
-) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const { allowed, remaining } = checkRateLimit(getIdentifier(req));
   if (!allowed) {
     res.setHeader('Retry-After', '60');
     return res.status(429).json({ error: 'Rate limit exceeded', details: 'Max 10 requests per minute. Please try again later.' });
   }
   res.setHeader('X-RateLimit-Remaining', String(remaining));
-
   if (!process.env.GEMINI_API_KEY && !process.env.API_KEY) {
-    return res.status(500).json({
-      error: 'Server configuration error',
-      details: 'GEMINI_API_KEY or API_KEY is not set'
-    });
+    return res.status(500).json({ error: 'Server configuration error', details: 'GEMINI_API_KEY or API_KEY is not set' });
   }
-
   try {
     const { brandData, findings } = req.body as {
       brandData: { name: string; domain: string; category: string; location: string };
       findings: string[];
     };
-
     if (!brandData?.name || !brandData?.domain) {
-      return res.status(400).json({
-        error: 'Missing required fields',
-        details: 'brandData with name and domain is required'
-      });
+      return res.status(400).json({ error: 'Missing required fields', details: 'brandData with name and domain is required' });
     }
-
     const asset = await generateFactualAnchors(brandData, findings ?? []);
-
     return res.status(200).json(asset);
   } catch (err) {
     console.error('factual-anchors error:', err);
-    return res.status(500).json({
-      error: 'Factual anchors generation failed',
-      details: err instanceof Error ? err.message : String(err)
-    });
+    return res.status(500).json({ error: 'Factual anchors generation failed', details: err instanceof Error ? err.message : String(err) });
   }
 }

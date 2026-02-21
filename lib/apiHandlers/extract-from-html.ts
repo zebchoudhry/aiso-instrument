@@ -1,7 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { processHtml } from './extract';
 
-// In-memory rate limiter (inlined for serverless; per-instance only)
 const rateLimitStore = new Map<string, number[]>();
 const RATE_WINDOW_MS = 60 * 1000;
 const RATE_MAX_REQUESTS = 10;
@@ -28,10 +27,7 @@ function getIdentifier(req: VercelRequest): string {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const { allowed, remaining } = checkRateLimit(getIdentifier(req));
   if (!allowed) {
     res.setHeader('Retry-After', '60');
@@ -41,15 +37,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
   }
   res.setHeader('X-RateLimit-Remaining', String(remaining));
-
   const { html, url } = (req.body || {}) as { html?: string; url?: string };
-
   if (!html || typeof html !== 'string') {
     return res.status(400).json({ error: 'HTML content required' });
   }
-
   const baseUrl = url && typeof url === 'string' ? url : 'https://example.com';
-
   try {
     const result = processHtml(html, baseUrl);
     return res.status(200).json(result);
