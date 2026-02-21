@@ -2,14 +2,15 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import adminAudits from '../../lib/apiHandlers/admin-audits';
 import adminUsers from '../../lib/apiHandlers/admin-users';
 
-const ROUTES: Record<string, (req: VercelRequest, res: VercelResponse) => Promise<void>> = {
-  'audits': adminAudits,
-  'users': adminUsers,
+type RouteHandler = (req: VercelRequest, res: VercelResponse) => Promise<unknown>;
+const ROUTES: Record<string, RouteHandler> = {
+  'audits': adminAudits as RouteHandler,
+  'users': adminUsers as RouteHandler,
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const path = req.query.path as string[] | undefined;
-  const route = Array.isArray(path) ? path[0] : (path || '').split('/')[0] || '';
+  const path = req.query.path as string[] | string | undefined;
+  const route = Array.isArray(path) ? path[0] : (typeof path === 'string' ? path : '').split('/')[0] || '';
 
   const routeHandler = ROUTES[route];
   if (!routeHandler) {

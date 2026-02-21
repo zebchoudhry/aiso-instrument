@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import AuditForm from './components/AuditForm';
 import AuditHistory from './components/AuditHistory';
 import ResultDashboard from './components/ResultDashboard';
@@ -26,8 +26,6 @@ import WhatWeMeasuredDisplay from './components/WhatWeMeasuredDisplay';
 import WhyThisMattersDisplay from './components/WhyThisMattersDisplay';
 import WhatWillChangeDisplay from './components/WhatWillChangeDisplay';
 import ProofItWorkedDisplay from './components/ProofItWorkedDisplay';
-import CompetitorDiscoveryDisplay from './components/CompetitorDiscoveryDisplay';
-import AnswerSimulationDisplay from './components/AnswerSimulationDisplay';
 
 import {
   AuditResponse,
@@ -75,7 +73,6 @@ function getHostname(url: string): string {
 }
 
 const App: React.FC = () => {
-  const navigate = useNavigate();
   const [observedAudit, setObservedAudit] = useState<AuditResponse | null>(null);
   const [deepSynthesis, setDeepSynthesis] = useState<DeepSynthesis | null>(null);
   const [queryPack, setQueryPack] = useState<QueryPackResponse | null>(null);
@@ -617,59 +614,6 @@ const App: React.FC = () => {
                 }
               }}
             />
-
-            {observedAudit && queryPack && (
-              <>
-                <CompetitorDiscoveryDisplay
-                  queryPack={queryPack}
-                  domain={getHostname(observedAudit.summary.url)}
-                  name={observedAudit.summary.subjectName ?? ''}
-                  auditId={lastAuditId}
-                />
-                <AnswerSimulationDisplay
-                  queryPack={queryPack}
-                  domain={getHostname(observedAudit.summary.url)}
-                  name={observedAudit.summary.subjectName ?? ''}
-                  auditId={lastAuditId ?? null}
-                />
-              </>
-            )}
-
-            {observedAudit && lastExtractionData && (
-              <div className="bg-indigo-50 border border-indigo-100 rounded-[2rem] p-8 flex flex-col md:flex-row items-center gap-6">
-                <div className="flex-1">
-                  <h3 className="text-xl font-black uppercase tracking-tight text-slate-900">90-Day Roadmap</h3>
-                  <p className="text-sm text-slate-600 mt-1">Turn your audit findings into a structured AI visibility execution plan with phase-by-phase actions.</p>
-                </div>
-                <div className="flex-shrink-0 flex items-center gap-3">
-                  {observedAudit?.summary?.url && (
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/trends?domain=${encodeURIComponent(getHostname(observedAudit.summary.url))}`)}
-                      className="text-indigo-600 hover:text-indigo-800 text-xs font-bold uppercase tracking-widest"
-                    >
-                      View visibility trends
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    onClick={() => navigate('/roadmap', {
-                    state: {
-                      auditResult: observedAudit,
-                      extractionData: lastExtractionData,
-                      queryPackQueries: (queryPack?.queries ?? []) as string[],
-                      url: observedAudit.summary.url,
-                      name: observedAudit.summary.subjectName ?? '',
-                      fixLibrary,
-                    }
-                  })}
-                  className="flex-shrink-0 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black uppercase tracking-widest px-8 py-4 rounded-xl transition-colors shadow-sm"
-                >
-                    View Roadmap
-                  </button>
-                </div>
-              </div>
-            )}
 
             <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 space-y-4">
               <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em]">Compare with Competitor</h4>
