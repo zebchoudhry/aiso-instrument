@@ -19,8 +19,17 @@ const ROUTES: Record<string, (req: VercelRequest, res: VercelResponse) => Promis
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const path = req.query.path as string[] | undefined;
-  const route = Array.isArray(path) ? path[0] : (path || '').split('/')[0] || '';
+  let path = req.query.path as string[] | undefined;
+  let route = Array.isArray(path) ? path[0] : (path || '').split('/')[0] || '';
+
+  // Fallback: derive route from req.url when Vercel doesn't populate path (non-Next.js)
+  if (!route && req.url) {
+    try {
+      const pathname = new URL(req.url, 'http://localhost').pathname;
+      const match = pathname.match(/^\/api\/([^/?]+)/);
+      if (match) route = match[1];
+    } catch (_) {}
+  }
 
   const routeHandler = ROUTES[route];
   if (!routeHandler) {

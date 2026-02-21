@@ -135,23 +135,14 @@ const App: React.FC = () => {
       setLoadingStage('Harvesting live website signals…');
 
       const t0 = Date.now();
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/65f2ea79-8116-43c5-a03e-0378f916e883',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e5c298'},body:JSON.stringify({sessionId:'e5c298',location:'App.tsx:handleAudit-start',message:'audit started',data:{url,name},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-      // #endregion
       const extractRes = await fetch('/api/extract', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ url })
       });
       const t1 = Date.now();
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/65f2ea79-8116-43c5-a03e-0378f916e883',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e5c298'},body:JSON.stringify({sessionId:'e5c298',location:'App.tsx:extract-done',message:'extract response received',data:{status:extractRes.status,ok:extractRes.ok,ms:t1-t0},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-      // #endregion
       if (!extractRes.ok) {
         const errBody = await extractRes.text();
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/65f2ea79-8116-43c5-a03e-0378f916e883',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e5c298'},body:JSON.stringify({sessionId:'e5c298',location:'App.tsx:extract-error',message:'extract failed',data:{status:extractRes.status,bodyPreview:String(errBody).slice(0,200)},timestamp:Date.now(),hypothesisId:'H2'})}).catch(()=>{});
-        // #endregion
         let message = 'Source website unreachable or blocked.';
         if (extractRes.status === 429) {
           message = 'Rate limit exceeded. Max 10 requests per minute. Please try again later.';
@@ -185,13 +176,7 @@ const App: React.FC = () => {
       setLoadingStage('Computing baseline AI readiness…');
 
       const t2 = Date.now();
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/65f2ea79-8116-43c5-a03e-0378f916e883',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e5c298'},body:JSON.stringify({sessionId:'e5c298',location:'App.tsx:before-quick-audit',message:'calling performQuickAudit',data:{},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-      // #endregion
       const baseAudit = await performQuickAudit(url, name, extractionData);
-      // #region agent log
-      fetch('http://127.0.0.1:7243/ingest/65f2ea79-8116-43c5-a03e-0378f916e883',{method:'POST',headers:{'Content-Type':'application/json','X-Debug-Session-Id':'e5c298'},body:JSON.stringify({sessionId:'e5c298',location:'App.tsx:quick-audit-done',message:'performQuickAudit completed',data:{ms:Date.now()-t2},timestamp:Date.now(),hypothesisId:'H3'})}).catch(()=>{});
-      // #endregion
 
       const fullAudit: AuditResponse = {
         ...baseAudit,
