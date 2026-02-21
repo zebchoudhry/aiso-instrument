@@ -1,0 +1,8 @@
+{
+  "name": "AISO Engine",
+  "description": "A high-precision auditing engine for Traditional SEO and AI Search Optimization (GEO). Score your website content against search engine and LLM requirements.",
+  "requestFramePermissions": [],
+  "scoringVersion": "v5.0",
+  "engine": "deterministic-gemini",
+  "lastUpdated": "2025-01-24"
+}

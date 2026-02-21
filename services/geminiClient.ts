@@ -1,0 +1,56 @@
+import type {
+  AuditResponse,
+  TechnicalHandoverArtifacts,
+  DeploymentChecklist,
+  ExtractionData,
+  PrescriptionExecutionCard
+} from '../types';
+
+export async function performQuickAudit(
+  url: string,
+  name: string,
+  extractionData: ExtractionData
+): Promise<AuditResponse> {
+  const res = await fetch('/api/quick-audit', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url, name, extractionData })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.details ?? data.error ?? res.statusText);
+  }
+  return res.json();
+}
+
+export async function generateHandoverArtifacts(
+  card: PrescriptionExecutionCard,
+  subjectName: string
+): Promise<TechnicalHandoverArtifacts> {
+  const res = await fetch('/api/handover-artifacts', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ card, subjectName })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.details ?? data.error ?? res.statusText);
+  }
+  return res.json();
+}
+
+export async function generateDeploymentChecklist(
+  card: PrescriptionExecutionCard,
+  subjectName: string
+): Promise<DeploymentChecklist> {
+  const res = await fetch('/api/deployment-checklist', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ card, subjectName })
+  });
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    throw new Error(data.details ?? data.error ?? res.statusText);
+  }
+  return res.json();
+}
