@@ -4,7 +4,7 @@ import {
   generateQueryPack,
   generateFixLibrary,
   generateClientTranslation
-} from '../../api/lib/geminiService';
+} from '../geminiService';
 import type { ExtractionData, AuditResponse } from '../../types';
 
 const rateLimitStore = new Map<string, number[]>();

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { generateHandoverArtifacts } from '../../api/lib/geminiService';
+import { generateHandoverArtifacts } from '../geminiService';
 import type { PrescriptionExecutionCard } from '../../types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

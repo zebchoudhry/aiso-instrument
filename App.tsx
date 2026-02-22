@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AuditForm from './components/AuditForm';
 import AuditHistory from './components/AuditHistory';
 import ResultDashboard from './components/ResultDashboard';
@@ -73,6 +73,7 @@ function getHostname(url: string): string {
 }
 
 const App: React.FC = () => {
+  const navigate = useNavigate();
   const [observedAudit, setObservedAudit] = useState<AuditResponse | null>(null);
   const [deepSynthesis, setDeepSynthesis] = useState<DeepSynthesis | null>(null);
   const [queryPack, setQueryPack] = useState<QueryPackResponse | null>(null);
@@ -517,6 +518,19 @@ const App: React.FC = () => {
           <ResultDashboard
             observed={observedAudit}
             auditId={lastAuditId}
+            onViewRoadmap={() => {
+              if (!observedAudit || !lastExtractionData) return;
+              navigate('/roadmap', {
+                state: {
+                  auditResult: observedAudit,
+                  extractionData: lastExtractionData,
+                  queryPackQueries: queryPack?.queries ?? [],
+                  url: observedAudit.summary.url ?? '',
+                  name: observedAudit.summary.subjectName ?? '',
+                  fixLibrary: fixLibrary ?? null,
+                },
+              });
+            }}
             onReset={handleReset}
             onReAudit={async () => {
               if (!observedAudit) return;

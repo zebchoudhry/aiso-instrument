@@ -5,11 +5,7 @@ import react from '@vitejs/plugin-react';
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
     return {
-      build: {
-        rollupOptions: {
-          input: 'index.html',
-        },
-      },
+      assetsInclude: ['**/*.html'],
       server: {
         port: Number(process.env.PORT) || 3000,
         host: '0.0.0.0',

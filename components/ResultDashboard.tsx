@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { AuditResponse, DeepSynthesis } from '../types';
 import ScoreCard from './ScoreCard';
 import { getPercentileLabel } from '../lib/benchmark';
@@ -6,6 +7,7 @@ import { getPercentileLabel } from '../lib/benchmark';
 interface ResultDashboardProps {
   observed: AuditResponse | null;
   auditId?: string | null;
+  onViewRoadmap?: () => void;
   onReset: () => void;
   onDownloadReport?: () => void;
   onReAudit?: () => void;
@@ -31,6 +33,7 @@ const TaskStatus: React.FC<{ label: string; active: boolean; complete: boolean }
 const ResultDashboard: React.FC<ResultDashboardProps> = ({
   observed,
   auditId,
+  onViewRoadmap,
   onReset,
   onDownloadReport,
   onReAudit,
@@ -197,6 +200,22 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
                 'Re-audit (Before/After)'
               )}
             </button>
+          )}
+          {onViewRoadmap && (
+            <button
+              onClick={onViewRoadmap}
+              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+            >
+              View Roadmap
+            </button>
+          )}
+          {!onViewRoadmap && auditId && (
+            <Link
+              to={`/roadmap/${auditId}`}
+              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+            >
+              View Roadmap
+            </Link>
           )}
         </div>
         <button onClick={onReset} className="py-4 text-[11px] font-black text-slate-400 hover:text-slate-900 uppercase tracking-[0.4em] transition-all">

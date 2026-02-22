@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { performQuickAudit } from '../../api/lib/geminiService';
+import { performQuickAudit } from '../geminiService';
 import type { ExtractionData } from '../../types';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

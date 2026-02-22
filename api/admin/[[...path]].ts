@@ -1,11 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import adminAudits from '../../lib/apiHandlers/admin-audits';
-import adminUsers from '../../lib/apiHandlers/admin-users';
 
 type RouteHandler = (req: VercelRequest, res: VercelResponse) => Promise<unknown>;
 const ROUTES: Record<string, RouteHandler> = {
   'audits': adminAudits as RouteHandler,
-  'users': adminUsers as RouteHandler,
 };
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

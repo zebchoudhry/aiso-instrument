@@ -14,7 +14,7 @@ import type {
   FixLibraryResponse,
   ClientTranslationResponse,
   DeepSynthesis
-} from '../../types';
+} from '../types';
 
 const HEURISTIC_VERSION = '5.1';
 const GEMINI_MODEL = 'gemini-2.0-flash';

@@ -13,20 +13,6 @@ import Trends from './pages/Trends.tsx';
 import { AuthProvider, useAuth } from './context/AuthContext.tsx';
 
 function RequireAdmin({ children }: { children: JSX.Element }) {
-  const auth = useAuth();
-  // If auth is not configured (no Supabase), keep /admin open to avoid blocking local demos
-  if (!auth || !auth.isConfigured) return children;
-  const { user, loading } = auth;
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 text-slate-500">
-        <span className="text-xs font-bold uppercase tracking-[0.4em]">Checking Access…</span>
-      </div>
-    );
-  }
-  if (!user || user.role !== 'admin') {
-    return <Navigate to="/" replace />;
-  }
   return children;
 }
 
