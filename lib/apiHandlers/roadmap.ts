@@ -33,7 +33,25 @@ Instructions:
 - Phase 2 (30-60 days) should focus on Citation Surface Expansion: social verification, sameAs, authority signals.
 - Phase 3 (60-90 days) should focus on Intent Query Domination: content depth, format, query-aligned pages.
 - scoreProjection.projected90Day should reflect realistic improvement if all actions are completed.
-- Return JSON only, no markdown.`;
+- Return a single valid JSON object only. Do not truncate; include the full response. No markdown or text outside the JSON.`;
+}
+
+/** Extract JSON from LLM text (strip markdown, find first { to last }) and parse. Throws user-friendly error on invalid JSON. */
+function parseRoadmapJson(raw: string): RoadmapResponse {
+  const stripped = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+  const first = stripped.indexOf('{');
+  const last = stripped.lastIndexOf('}');
+  if (first === -1 || last === -1 || last <= first) {
+    throw new Error('Roadmap response was invalid or truncated. Please try again.');
+  }
+  const jsonStr = stripped.slice(first, last + 1);
+  try {
+    return JSON.parse(jsonStr) as RoadmapResponse;
+  } catch (e) {
+    const msg = e instanceof SyntaxError ? e.message : String(e);
+    console.error('[roadmap] JSON parse error:', msg, 'length:', jsonStr.length);
+    throw new Error('Roadmap response was invalid or truncated. Please try again.');
+  }
 }
 
 const ROADMAP_SCHEMA = {
@@ -118,7 +136,7 @@ async function callClaude(prompt: string, apiKey: string): Promise<RoadmapRespon
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-5',
-    max_tokens: 2048,
+    max_tokens: 4096,
     temperature: 0.35,
     messages: [{ role: 'user', content: prompt }],
   });
@@ -126,8 +144,7 @@ async function callClaude(prompt: string, apiKey: string): Promise<RoadmapRespon
   const textBlock = message.content.find((b: { type: string }) => b.type === 'text') as { type: 'text'; text: string } | undefined;
   if (!textBlock) throw new Error('No text in Claude response');
 
-  const jsonStr = textBlock.text.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-  return JSON.parse(jsonStr) as RoadmapResponse;
+  return parseRoadmapJson(textBlock.text);
 }
 
 async function callOpenAI(prompt: string, apiKey: string): Promise<RoadmapResponse> {
@@ -145,7 +162,7 @@ async function callOpenAI(prompt: string, apiKey: string): Promise<RoadmapRespon
   });
 
   const text = response.choices[0]?.message?.content ?? '';
-  return JSON.parse(text) as RoadmapResponse;
+  return parseRoadmapJson(text);
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -194,6 +211,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    return res.status(500).json({ error: 'Roadmap generation failed', details: e?.message });
+    const details = e?.message?.includes('position') && e?.message?.includes('JSON')
+      ? 'Roadmap response was invalid or truncated. Please try again.'
+      : (e?.message ?? 'Roadmap generation failed');
+    return res.status(500).json({ error: 'Roadmap generation failed', details });
   }
 }
