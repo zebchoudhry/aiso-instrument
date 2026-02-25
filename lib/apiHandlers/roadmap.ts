@@ -136,7 +136,7 @@ async function callClaude(prompt: string, apiKey: string): Promise<RoadmapRespon
 
   const message = await client.messages.create({
     model: 'claude-sonnet-4-5',
-    max_tokens: 4096,
+    max_tokens: 8192,
     temperature: 0.35,
     messages: [{ role: 'user', content: prompt }],
   });
@@ -183,11 +183,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   const openaiKey = process.env.OPENAI_API_KEY;
 
+  const isParseFailure = (msg: string) =>
+    msg.includes('invalid or truncated') || msg.includes('Unterminated string') || (msg.includes('position') && msg.includes('JSON'));
+
   try {
     let roadmap: RoadmapResponse;
 
     if (anthropicKey) {
-      roadmap = await callClaude(prompt, anthropicKey);
+      try {
+        roadmap = await callClaude(prompt, anthropicKey);
+      } catch (firstErr: unknown) {
+        const firstMsg = (firstErr as Error)?.message ?? '';
+        if (isParseFailure(firstMsg)) {
+          console.error('[roadmap] First attempt parse failed, retrying once:', firstMsg);
+          roadmap = await callClaude(prompt, anthropicKey);
+        } else {
+          throw firstErr;
+        }
+      }
     } else if (openaiKey) {
       roadmap = await callOpenAI(prompt, openaiKey);
     } else {
@@ -211,7 +224,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    const details = e?.message?.includes('position') && e?.message?.includes('JSON')
+    const details = isParseFailure(e?.message ?? '')
       ? 'Roadmap response was invalid or truncated. Please try again.'
       : (e?.message ?? 'Roadmap generation failed');
     return res.status(500).json({ error: 'Roadmap generation failed', details });

@@ -59,7 +59,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const fixLibrary = await generateFixLibrary(findings, apiKey);
     return res.status(200).json({ findings, queryPack, fixLibrary, clientTranslation });
   } catch (err) {
-    console.error('audit-enrich error:', err);
-    return res.status(500).json({ error: 'AI enrichment failed', details: err instanceof Error ? err.message : String(err) });
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error('[audit-enrich] Error:', msg);
+    if (err instanceof Error && err.stack) console.error('[audit-enrich] Stack:', err.stack);
+    return res.status(500).json({ error: 'AI enrichment failed', details: msg });
   }
 }
