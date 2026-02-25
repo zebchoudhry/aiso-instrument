@@ -241,9 +241,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(429).json({ error: "Rate limit exceeded", details: "Max 10 requests per minute. Please try again later." });
   }
   res.setHeader('X-RateLimit-Remaining', String(remaining));
-  const url = (req.body && typeof req.body === 'object' && 'url' in req.body) ? (req.body as any).url : undefined;
-  if (!url) {
+  let url = (req.body && typeof req.body === 'object' && 'url' in req.body) ? (req.body as any).url : undefined;
+  if (!url || typeof url !== 'string') {
     return res.status(400).json({ error: "URL required" });
+  }
+  url = url.trim();
+  if (!/^https?:\/\//i.test(url)) {
+    url = 'https://' + url;
   }
   try {
     const controller = new AbortController();
