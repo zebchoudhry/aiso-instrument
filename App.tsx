@@ -528,6 +528,7 @@ const App: React.FC = () => {
                   url: observedAudit.summary.url ?? '',
                   name: observedAudit.summary.subjectName ?? '',
                   fixLibrary: fixLibrary ?? null,
+                  findings: observedAudit.keyFindings ?? [],
                 },
               });
             }}

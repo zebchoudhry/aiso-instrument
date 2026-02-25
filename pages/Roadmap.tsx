@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
 import type { RoadmapResponse, RoadmapAction, RoadmapPayload, AuditResponse, ExtractionData, FixLibraryResponse } from '../types';
 import { buildRoadmapPayload } from '../lib/roadmapPayload';
+import { SchemaGenerator } from '../services/schemaGenerator';
 
 interface LocationState {
   auditResult?: AuditResponse;
@@ -10,6 +11,16 @@ interface LocationState {
   url?: string;
   name?: string;
   fixLibrary?: FixLibraryResponse | null;
+  findings?: Array<{ diagnosticTrace?: string; label?: string }>;
+}
+
+/** Context passed to action cards for generating assets */
+export interface RoadmapAssetContext {
+  extractionData: ExtractionData | null;
+  url: string;
+  name: string;
+  findingsStrings: string[];
+  fixLibrary: FixLibraryResponse | null;
 }
 
 const PHASE_LABELS = [
@@ -30,6 +41,13 @@ const CONFIDENCE_COLORS = {
   High: 'text-emerald-600',
 };
 
+function normalizeFindings(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((f: unknown) => (typeof f === 'string' ? f : (f as { diagnosticTrace?: string; label?: string })?.diagnosticTrace ?? (f as { diagnosticTrace?: string; label?: string })?.label ?? ''))
+    .filter(Boolean);
+}
+
 function PhaseCard({
   phaseKey,
   label,
@@ -37,6 +55,7 @@ function PhaseCard({
   title,
   objective,
   actions,
+  assetContext,
 }: {
   phaseKey: string;
   label: string;
@@ -44,6 +63,7 @@ function PhaseCard({
   title: string;
   objective: string;
   actions: RoadmapAction[];
+  assetContext: RoadmapAssetContext | null;
 }) {
   const [open, setOpen] = useState(true);
 
@@ -79,7 +99,7 @@ function PhaseCard({
 
           <div className="space-y-4">
             {actions.map((action, i) => (
-              <ActionCard key={i} action={action} index={i} phaseKey={phaseKey} />
+              <ActionCard key={i} action={action} index={i} phaseKey={phaseKey} assetContext={assetContext} />
             ))}
           </div>
         </div>
@@ -92,56 +112,229 @@ function ActionCard({
   action,
   index,
   phaseKey,
+  assetContext,
 }: {
   action: RoadmapAction;
   index: number;
   phaseKey: string;
+  assetContext: RoadmapAssetContext | null;
 }) {
-  const [assetPending, setAssetPending] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [assetType, setAssetType] = useState<'schema' | 'factual' | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<{ type: 'schema' | 'factual'; content: string; title?: string } | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const handleGenerateAsset = () => {
-    setAssetPending(true);
-    setTimeout(() => setAssetPending(false), 1500);
+  const handleOpenModal = () => {
+    setModalOpen(true);
+    setAssetType(null);
+    setResult(null);
+    setError(null);
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setAssetType(null);
+    setResult(null);
+    setError(null);
+  };
+
+  const handleGenerateSchema = () => {
+    if (!assetContext?.extractionData) {
+      setError('No extraction data available.');
+      return;
+    }
+    setAssetType('schema');
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const name = assetContext.name || assetContext.extractionData.title?.split(/[|-]/)[0]?.trim() || 'Organization';
+      const siteUrl = assetContext.url || 'https://example.com';
+      const description = (assetContext.extractionData.metaDescription || '').slice(0, 200) || undefined;
+      const sameAs = assetContext.extractionData.sameAsUrls?.length
+        ? assetContext.extractionData.sameAsUrls
+        : (assetContext.extractionData.citationAnchors ?? []).slice(0, 5);
+      const schema = SchemaGenerator.generateOrganizationSchema(name, siteUrl, description, sameAs);
+      setResult({ type: 'schema', content: schema.code, title: 'Organization schema' });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Schema generation failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGenerateFactualAnchors = async () => {
+    if (!assetContext) {
+      setError('No audit context available.');
+      return;
+    }
+    setAssetType('factual');
+    setLoading(true);
+    setError(null);
+    setResult(null);
+    try {
+      const domain = assetContext.url || '';
+      const res = await fetch('/api/factual-anchors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brandData: {
+            name: assetContext.name || new URL(domain || 'https://example.com').hostname,
+            domain: domain || 'https://example.com',
+            category: '',
+            location: '',
+          },
+          findings: assetContext.findingsStrings,
+        }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.details || data.error || res.statusText);
+      }
+      const data = await res.json();
+      const content = typeof data === 'string' ? data : (data.content ?? data.markdown ?? JSON.stringify(data, null, 2));
+      setResult({ type: 'factual', content, title: 'Factual anchoring asset' });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Factual anchors generation failed');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCopy = async () => {
+    if (!result) return;
+    try {
+      await navigator.clipboard.writeText(result.content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (_) {}
+  };
+
+  const handleDownload = () => {
+    if (!result) return;
+    const ext = result.type === 'schema' ? 'json' : 'txt';
+    const blob = new Blob([result.content], { type: result.type === 'schema' ? 'application/json' : 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `roadmap-asset-${result.type}-${index + 1}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(a.href);
   };
 
   return (
-    <div className="bg-slate-50 rounded-2xl p-6 space-y-3">
-      <div className="flex items-start justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <span className="w-7 h-7 rounded-full bg-indigo-600 text-white text-xs font-black flex items-center justify-center flex-shrink-0">
-            {index + 1}
+    <>
+      <div className="bg-slate-50 rounded-2xl p-6 space-y-3">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <span className="w-7 h-7 rounded-full bg-indigo-600 text-white text-xs font-black flex items-center justify-center flex-shrink-0">
+              {index + 1}
+            </span>
+            <h4 className="font-black text-slate-900 text-sm uppercase tracking-tight">{action.title}</h4>
+          </div>
+          <span
+            className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full flex-shrink-0 ${DIFFICULTY_COLORS[action.difficulty] ?? DIFFICULTY_COLORS.Medium}`}
+          >
+            {action.difficulty}
           </span>
-          <h4 className="font-black text-slate-900 text-sm uppercase tracking-tight">{action.title}</h4>
         </div>
-        <span
-          className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full flex-shrink-0 ${DIFFICULTY_COLORS[action.difficulty] ?? DIFFICULTY_COLORS.Medium}`}
-        >
-          {action.difficulty}
-        </span>
+
+        <div className="grid md:grid-cols-2 gap-4 text-xs text-slate-600 pl-10">
+          <div>
+            <span className="font-bold uppercase tracking-wider text-slate-400 block mb-1">Why</span>
+            <p>{action.why}</p>
+          </div>
+          <div>
+            <span className="font-bold uppercase tracking-wider text-slate-400 block mb-1">Expected Impact</span>
+            <p>{action.expectedImpact}</p>
+          </div>
+        </div>
+
+        <div className="pl-10">
+          <button
+            type="button"
+            onClick={handleOpenModal}
+            className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-400 px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+          >
+            Generate Deployable Assets
+          </button>
+        </div>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4 text-xs text-slate-600 pl-10">
-        <div>
-          <span className="font-bold uppercase tracking-wider text-slate-400 block mb-1">Why</span>
-          <p>{action.why}</p>
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={handleCloseModal}>
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+              <h3 className="text-sm font-black uppercase tracking-tight text-slate-900">Generate deployable asset</h3>
+              <button type="button" onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600 p-1">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="p-6 space-y-4 flex-1 overflow-y-auto">
+              {!assetType && !result && (
+                <div className="space-y-3">
+                  <p className="text-xs text-slate-600">Choose what to generate for this action:</p>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      type="button"
+                      onClick={handleGenerateSchema}
+                      disabled={!assetContext?.extractionData}
+                      className="text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 text-sm font-bold text-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Schema snippet (Organization JSON-LD)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleGenerateFactualAnchors()}
+                      disabled={!assetContext}
+                      className="text-left px-4 py-3 rounded-xl border border-slate-200 hover:border-indigo-300 hover:bg-indigo-50/50 text-sm font-bold text-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      Factual anchoring asset
+                    </button>
+                  </div>
+                </div>
+              )}
+              {loading && (
+                <div className="flex items-center gap-3 text-slate-600">
+                  <div className="w-6 h-6 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm font-medium">Generating…</span>
+                </div>
+              )}
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                  <p className="text-sm text-red-700 font-medium">{error}</p>
+                </div>
+              )}
+              {result && !loading && (
+                <div className="space-y-3">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{result.title}</p>
+                  <pre className="bg-slate-900 text-slate-100 p-4 rounded-xl text-xs overflow-x-auto max-h-48 overflow-y-auto font-mono whitespace-pre-wrap break-words">
+                    {result.content}
+                  </pre>
+                  <div className="flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleCopy}
+                      className="px-4 py-2 rounded-lg border border-slate-200 text-xs font-bold uppercase tracking-wider text-slate-700 hover:bg-slate-50"
+                    >
+                      {copied ? 'Copied!' : 'Copy'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownload}
+                      className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-xs font-bold uppercase tracking-wider hover:bg-indigo-500"
+                    >
+                      Download
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-        <div>
-          <span className="font-bold uppercase tracking-wider text-slate-400 block mb-1">Expected Impact</span>
-          <p>{action.expectedImpact}</p>
-        </div>
-      </div>
-
-      <div className="pl-10">
-        <button
-          type="button"
-          onClick={handleGenerateAsset}
-          disabled={assetPending}
-          className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-400 px-4 py-2 rounded-lg transition-all disabled:opacity-50"
-        >
-          {assetPending ? 'Generating…' : 'Generate Deployable Assets'}
-        </button>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
 
@@ -199,11 +392,13 @@ export default function Roadmap() {
   const [error, setError] = useState<string | null>(null);
   const [domain, setDomain] = useState('');
   const [auditName, setAuditName] = useState('');
+  const [assetContext, setAssetContext] = useState<RoadmapAssetContext | null>(null);
 
   useEffect(() => {
     async function run() {
       setIsLoading(true);
       setError(null);
+      setAssetContext(null);
 
       let auditResult: AuditResponse | null = state.auditResult ?? null;
       let extractionData: ExtractionData | null = state.extractionData ?? null;
@@ -211,6 +406,7 @@ export default function Roadmap() {
       let url = state.url ?? '';
       let name = state.name ?? '';
       let fixLibrary: FixLibraryResponse | null = state.fixLibrary ?? null;
+      let findingsRaw: unknown = state.findings ?? auditResult?.keyFindings ?? null;
 
       if (!auditResult && auditId) {
         try {
@@ -223,6 +419,7 @@ export default function Roadmap() {
           url = data.url ?? '';
           name = data.name ?? '';
           fixLibrary = data.fixLibrary ?? null;
+          findingsRaw = data.findings ?? findingsRaw;
         } catch (err) {
           setError('Could not load audit. Check the audit ID or run a new audit.');
           setIsLoading(false);
@@ -242,6 +439,14 @@ export default function Roadmap() {
         setDomain(name);
       }
       setAuditName(name);
+
+      setAssetContext({
+        extractionData,
+        url: url || 'https://example.com',
+        name: name || '',
+        findingsStrings: normalizeFindings(findingsRaw),
+        fixLibrary,
+      });
 
       const payload: RoadmapPayload = buildRoadmapPayload(auditResult, extractionData, queryPackQueries, url, fixLibrary);
 
@@ -335,6 +540,7 @@ export default function Roadmap() {
                   title={title}
                   objective={phase.objective}
                   actions={phase.actions}
+                  assetContext={assetContext}
                 />
               );
             })}
