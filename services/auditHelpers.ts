@@ -1,4 +1,4 @@
-import type { AuditDelta, ExecutiveReport, ScoreSnapshot, ReadinessScore } from '../types';
+import type { AuditDelta, ExecutiveReport, ScoreSnapshot, ReadinessScore } from '../types.js';
 
 /** Minimal audit shape for delta (before/after) */
 export interface MinimalAuditLike {

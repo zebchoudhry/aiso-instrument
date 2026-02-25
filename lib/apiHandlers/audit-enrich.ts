@@ -4,8 +4,8 @@ import {
   generateQueryPack,
   generateFixLibrary,
   generateClientTranslation
-} from '../geminiService';
-import type { ExtractionData, AuditResponse } from '../../types';
+} from '../geminiService.js';
+import type { ExtractionData, AuditResponse } from '../../types.js';
 
 const rateLimitStore = new Map<string, number[]>();
 const RATE_WINDOW_MS = 60 * 1000;

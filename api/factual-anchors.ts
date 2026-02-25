@@ -1,2 +1,2 @@
-import handler from '../lib/apiHandlers/factual-anchors';
+import handler from '../lib/apiHandlers/factual-anchors.js';
 export default handler;

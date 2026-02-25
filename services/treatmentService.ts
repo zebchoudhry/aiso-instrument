@@ -8,7 +8,7 @@ import {
   TreatmentPlan, 
   UserRole, 
   PrescriptionExecutionCard 
-} from "../types";
+} from "../types.js";
 
 // ALIGNED WITH CANONICAL FAILURE CLASSES
 const PRESCRIPTION_LIBRARY: Prescription[] = [

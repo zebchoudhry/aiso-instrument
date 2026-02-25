@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { processHtml } from './extract';
+import { processHtml } from './extract.js';
 
 const rateLimitStore = new Map<string, number[]>();
 const RATE_WINDOW_MS = 60 * 1000;

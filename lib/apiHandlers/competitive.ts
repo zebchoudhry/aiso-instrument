@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { CompetitiveAnalysisService } from '../../services/competitiveAnalysis';
+import { CompetitiveAnalysisService } from '../../services/competitiveAnalysis.js';
 
 const rateLimitStore = new Map<string, number[]>();
 const RATE_WINDOW_MS = 60 * 1000;

@@ -1,2 +1,2 @@
-import handler from '../lib/apiHandlers/deployment-checklist';
+import handler from '../lib/apiHandlers/deployment-checklist.js';
 export default handler;

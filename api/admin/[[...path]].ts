@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import adminAudits from '../../lib/apiHandlers/admin-audits';
+import adminAudits from '../../lib/apiHandlers/admin-audits.js';
 
 type RouteHandler = (req: VercelRequest, res: VercelResponse) => Promise<unknown>;
 const ROUTES: Record<string, RouteHandler> = {

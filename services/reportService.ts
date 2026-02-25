@@ -1,5 +1,5 @@
 import { jsPDF } from 'jspdf';
-import type { AuditResponse, FixLibraryResponse, ClientTranslationResponse } from '../types';
+import type { AuditResponse, FixLibraryResponse, ClientTranslationResponse } from '../types.js';
 
 export interface DiagnosticReport {
   id: string;

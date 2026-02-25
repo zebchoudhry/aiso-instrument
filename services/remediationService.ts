@@ -1,6 +1,6 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
-import { FactualAnchoringAsset } from "../types";
+import { FactualAnchoringAsset } from "../types.js";
 
 const CLINICAL_ASSET_INSTRUCTION = `You are an AI Remediation Asset Generator operating in CLINICAL MODE.
 

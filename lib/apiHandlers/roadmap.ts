@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import type { RoadmapPayload, RoadmapResponse } from '../../types';
+import type { RoadmapPayload, RoadmapResponse } from '../../types.js';
 
 function buildPrompt(payload: RoadmapPayload): string {
   return `You are an AI Visibility Strategy Engine.

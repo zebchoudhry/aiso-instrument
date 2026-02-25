@@ -1,7 +1,7 @@
 // services/competitiveAnalysis.ts
 // Real side-by-side competitive analysis
 
-import { ExtractionService, ExtractedSignals } from './extractionService';
+import { ExtractionService, ExtractedSignals } from './extractionService.js';
 
 export interface CompetitiveGap {
   category: string;

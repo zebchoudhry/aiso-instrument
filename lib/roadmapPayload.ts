@@ -1,4 +1,4 @@
-import type { ExtractionData, AuditResponse, RoadmapPayload, FixLibraryResponse } from '../types';
+import type { ExtractionData, AuditResponse, RoadmapPayload, FixLibraryResponse } from '../types.js';
 
 const COMMON_CITATION_DOMAINS = [
   'linkedin.com', 'twitter.com', 'x.com', 'facebook.com', 'instagram.com',

@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { generateFactualAnchors } from '../../services/remediationService';
+import { generateFactualAnchors } from '../../services/remediationService.js';
 
 const rateLimitStore = new Map<string, number[]>();
 const RATE_WINDOW_MS = 60 * 1000;

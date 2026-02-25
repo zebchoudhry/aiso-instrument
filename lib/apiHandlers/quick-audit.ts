@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { performQuickAudit } from '../geminiService';
-import type { ExtractionData } from '../../types';
+import { performQuickAudit } from '../geminiService.js';
+import type { ExtractionData } from '../../types.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');

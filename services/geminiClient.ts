@@ -4,7 +4,7 @@ import type {
   DeploymentChecklist,
   ExtractionData,
   PrescriptionExecutionCard
-} from '../types';
+} from '../types.js';
 
 export async function performQuickAudit(
   url: string,

@@ -1,5 +1,5 @@
 
-import { BaselineRecord } from "../types";
+import { BaselineRecord } from "../types.js";
 
 const STORAGE_KEY = 'ai_discovery_baselines';
 

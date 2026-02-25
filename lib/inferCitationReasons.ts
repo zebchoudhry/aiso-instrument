@@ -1,5 +1,5 @@
-import type { ExtractionData } from '../types';
-import type { AuditFinding } from '../types';
+import type { ExtractionData } from '../types.js';
+import type { AuditFinding } from '../types.js';
 
 /**
  * Maps extraction data gaps and audit findings to plain-language reasons
