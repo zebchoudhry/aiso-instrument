@@ -523,14 +523,17 @@ export default function Roadmap() {
 
         {roadmap && (
           <div className="space-y-6">
-            <ScoreProjection
-              current={roadmap.scoreProjection.current}
-              projected90Day={roadmap.scoreProjection.projected90Day}
-              confidence={roadmap.scoreProjection.confidence}
-            />
+            {roadmap.scoreProjection && (
+              <ScoreProjection
+                current={roadmap.scoreProjection.current ?? 0}
+                projected90Day={roadmap.scoreProjection.projected90Day ?? 0}
+                confidence={(roadmap.scoreProjection.confidence as 'Low' | 'Medium' | 'High') ?? 'Medium'}
+              />
+            )}
 
             {PHASE_LABELS.map(({ key, label, subtitle, title }) => {
               const phase = roadmap[key as 'phase1' | 'phase2' | 'phase3'];
+              if (!phase || !phase.actions) return null;
               return (
                 <PhaseCard
                   key={key}
@@ -538,8 +541,8 @@ export default function Roadmap() {
                   label={label}
                   subtitle={subtitle}
                   title={title}
-                  objective={phase.objective}
-                  actions={phase.actions}
+                  objective={phase.objective ?? ''}
+                  actions={Array.isArray(phase.actions) ? phase.actions : []}
                   assetContext={assetContext}
                 />
               );
