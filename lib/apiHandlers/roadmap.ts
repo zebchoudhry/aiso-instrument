@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import type { RoadmapPayload, RoadmapResponse } from '../../types.js';
+import type { RoadmapPayload, RoadmapResponse, RoadmapPhase } from '../../types.js';
 
 function buildPrompt(payload: RoadmapPayload): string {
   return `You are an AI Visibility Strategy Engine.
@@ -52,6 +52,34 @@ function parseRoadmapJson(raw: string): RoadmapResponse {
     console.error('[roadmap] JSON parse error:', msg, 'length:', jsonStr.length);
     throw new Error('Roadmap response was invalid or truncated. Please try again.');
   }
+}
+
+function getPhase(raw: unknown): RoadmapPhase {
+  const p = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  return {
+    objective: typeof p.objective === 'string' ? p.objective : '',
+    actions: Array.isArray(p.actions) ? p.actions : [],
+  };
+}
+
+/** Normalize LLM response to expected shape; coerce alternate keys (Phase1, phase_1) to phase1 etc. */
+function normalizeRoadmapResponse(parsed: unknown): RoadmapResponse {
+  const obj = parsed && typeof parsed === 'object' ? (parsed as Record<string, unknown>) : {};
+  const phase1 = obj.phase1 ?? obj.Phase1 ?? obj.phase_1;
+  const phase2 = obj.phase2 ?? obj.Phase2 ?? obj.phase_2;
+  const phase3 = obj.phase3 ?? obj.Phase3 ?? obj.phase_3;
+  const scoreProjectionRaw = obj.scoreProjection ?? obj.ScoreProjection ?? obj.score_projection;
+  const sp = scoreProjectionRaw && typeof scoreProjectionRaw === 'object' ? (scoreProjectionRaw as Record<string, unknown>) : {};
+  return {
+    phase1: getPhase(phase1),
+    phase2: getPhase(phase2),
+    phase3: getPhase(phase3),
+    scoreProjection: {
+      current: typeof sp.current === 'number' ? sp.current : 0,
+      projected90Day: typeof sp.projected90Day === 'number' ? sp.projected90Day : 0,
+      confidence: (typeof sp.confidence === 'string' && ['Low', 'Medium', 'High'].includes(sp.confidence) ? sp.confidence : 'Medium') as 'Low' | 'Medium' | 'High',
+    },
+  };
 }
 
 const ROADMAP_SCHEMA = {
@@ -210,6 +238,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    roadmap = normalizeRoadmapResponse(roadmap);
     return res.status(200).json(roadmap);
   } catch (err: unknown) {
     const e = err as Error;
@@ -217,8 +246,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (anthropicKey && openaiKey && e?.message?.toLowerCase().includes('claude')) {
       try {
-        const roadmap = await callOpenAI(prompt, openaiKey);
-        return res.status(200).json(roadmap);
+        let fallbackRoadmap = await callOpenAI(prompt, openaiKey);
+        fallbackRoadmap = normalizeRoadmapResponse(fallbackRoadmap);
+        return res.status(200).json(fallbackRoadmap);
       } catch (fallbackErr: unknown) {
         console.error('[roadmap] GPT-4 fallback also failed:', (fallbackErr as Error)?.message);
       }
