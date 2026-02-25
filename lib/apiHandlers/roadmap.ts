@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import type { RoadmapPayload, RoadmapResponse, RoadmapPhase } from '../../types.js';
+import type { RoadmapPayload, RoadmapResponse, RoadmapPhase, RoadmapAction } from '../../types.js';
 
 function buildPrompt(payload: RoadmapPayload): string {
   return `You are an AI Visibility Strategy Engine.
@@ -54,11 +54,34 @@ function parseRoadmapJson(raw: string): RoadmapResponse {
   }
 }
 
+function normalizeAction(raw: unknown): RoadmapAction {
+  const a = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const get = (keys: string[]) => {
+    for (const k of keys) {
+      const v = a[k];
+      if (typeof v === 'string') return v;
+    }
+    return '';
+  };
+  const diff = get(['difficulty', 'Difficulty']).toLowerCase();
+  const difficulty = ['low', 'medium', 'high'].includes(diff)
+    ? (diff.charAt(0).toUpperCase() + diff.slice(1)) as 'Low' | 'Medium' | 'High'
+    : 'Medium';
+  return {
+    title: get(['title', 'Title']) || 'Untitled action',
+    why: get(['why', 'Why', 'rationale', 'Rationale']),
+    expectedImpact: get(['expectedImpact', 'ExpectedImpact', 'expected_impact', 'Expected Impact']),
+    difficulty,
+  };
+}
+
 function getPhase(raw: unknown): RoadmapPhase {
   const p = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
   return {
     objective: typeof p.objective === 'string' ? p.objective : '',
-    actions: Array.isArray(p.actions) ? p.actions : [],
+    actions: Array.isArray(p.actions)
+      ? p.actions.map((a: unknown) => normalizeAction(a))
+      : [],
   };
 }
 
@@ -244,7 +267,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const e = err as Error;
     console.error('[roadmap] LLM error:', e?.message);
 
-    if (anthropicKey && openaiKey && e?.message?.toLowerCase().includes('claude')) {
+    if (anthropicKey && openaiKey) {
       try {
         let fallbackRoadmap = await callOpenAI(prompt, openaiKey);
         fallbackRoadmap = normalizeRoadmapResponse(fallbackRoadmap);

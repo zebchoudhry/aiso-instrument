@@ -428,7 +428,11 @@ export default function Roadmap() {
       }
 
       if (!auditResult || !extractionData) {
-        setError(null);
+        if (auditId && auditResult && !extractionData) {
+          setError('Audit data is incomplete — extraction data is missing. Run a new audit to generate the roadmap.');
+        } else {
+          setError(null);
+        }
         setIsLoading(false);
         return;
       }
@@ -470,7 +474,7 @@ export default function Roadmap() {
     }
 
     run();
-  }, []);
+  }, [auditId ?? '', state?.auditResult != null]);
 
   return (
     <div className="min-h-screen bg-slate-50">
