@@ -41,6 +41,14 @@ const CONFIDENCE_COLORS = {
   High: 'text-emerald-600',
 };
 
+interface RoadmapValidation {
+  validationScore: number;
+  confidenceAdjustment: 'Low' | 'Medium' | 'High';
+  issues: string[];
+  recommendations: string[];
+  scoreProjectionAssessment: 'Realistic' | 'Aggressive' | 'Unrealistic';
+}
+
 function normalizeFindings(raw: unknown): string[] {
   if (!Array.isArray(raw)) return [];
   return raw
@@ -68,23 +76,23 @@ function PhaseCard({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-[2rem] overflow-hidden">
+    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-8 py-6 hover:bg-slate-50 transition-colors text-left"
+        className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors text-left"
       >
-        <div className="flex items-center gap-4">
-          <div className="bg-indigo-600 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full">
+        <div className="flex items-center gap-2">
+          <div className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
             {label}
           </div>
           <div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">{subtitle}</span>
-            <span className="text-lg font-black uppercase tracking-tight text-slate-900">{title}</span>
+            <span className="text-base font-black uppercase tracking-tight text-slate-900">{title}</span>
           </div>
         </div>
         <svg
-          className={`w-5 h-5 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`w-4 h-4 text-slate-400 transition-transform ${open ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -94,10 +102,10 @@ function PhaseCard({
       </button>
 
       {open && (
-        <div className="px-8 pb-8 space-y-6">
-          <p className="text-sm text-slate-600 border-l-4 border-indigo-200 pl-4 py-1">{objective}</p>
+        <div className="px-4 pb-4 space-y-3">
+          <p className="text-xs text-slate-600 border-l-4 border-indigo-200 pl-3 py-0.5">{objective}</p>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {actions.map((action, i) => (
               <ActionCard key={i} action={action} index={i} phaseKey={phaseKey} assetContext={assetContext} />
             ))}
@@ -225,13 +233,13 @@ function ActionCard({
 
   return (
     <>
-      <div className="bg-slate-50 rounded-2xl p-6 space-y-3">
-        <div className="flex items-start justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="w-7 h-7 rounded-full bg-indigo-600 text-white text-xs font-black flex items-center justify-center flex-shrink-0">
+      <div className="bg-slate-50 rounded-xl p-4 space-y-2">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] font-black flex items-center justify-center flex-shrink-0">
               {index + 1}
             </span>
-            <h4 className="font-black text-slate-900 text-sm uppercase tracking-tight">{action.title}</h4>
+            <h4 className="font-black text-slate-900 text-xs uppercase tracking-tight">{action.title}</h4>
           </div>
           <span
             className={`text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded-full flex-shrink-0 ${DIFFICULTY_COLORS[action.difficulty] ?? DIFFICULTY_COLORS.Medium}`}
@@ -240,7 +248,7 @@ function ActionCard({
           </span>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-4 text-xs text-slate-600 pl-10">
+        <div className="grid md:grid-cols-2 gap-3 text-xs text-slate-600 pl-8">
           <div>
             <span className="font-bold uppercase tracking-wider text-slate-400 block mb-1">Why</span>
             <p>{action.why}</p>
@@ -251,11 +259,11 @@ function ActionCard({
           </div>
         </div>
 
-        <div className="pl-10">
+        <div className="pl-8">
           <button
             type="button"
             onClick={handleOpenModal}
-            className="text-[10px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-400 px-4 py-2 rounded-lg transition-all disabled:opacity-50"
+            className="text-[9px] font-black uppercase tracking-widest text-indigo-600 hover:text-indigo-800 border border-indigo-200 hover:border-indigo-400 px-3 py-1.5 rounded-lg transition-all disabled:opacity-50"
           >
             Generate Deployable Assets
           </button>
@@ -344,10 +352,10 @@ function ScoreProjection({ current, projected90Day, confidence }: { current: num
   const barProjected = Math.min(100, projected90Day);
 
   return (
-    <div className="bg-slate-900 text-white rounded-[2rem] p-8 space-y-6">
+    <div className="bg-slate-900 text-white rounded-xl p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-xl font-black uppercase tracking-tight">Score Projection</h3>
+          <h3 className="text-base font-black uppercase tracking-tight">Score Projection</h3>
           <p className="text-slate-400 text-xs mt-1">Estimated 90-day improvement if roadmap is completed</p>
         </div>
         <span className={`text-sm font-bold ${CONFIDENCE_COLORS[confidence] ?? ''}`}>
@@ -355,7 +363,7 @@ function ScoreProjection({ current, projected90Day, confidence }: { current: num
         </span>
       </div>
 
-      <div className="grid grid-cols-2 gap-6">
+      <div className="grid grid-cols-2 gap-4">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Current</span>
           <div className="text-5xl font-black">{current}</div>
@@ -381,6 +389,53 @@ function ScoreProjection({ current, projected90Day, confidence }: { current: num
   );
 }
 
+function ValidationScore({ validation }: { validation: RoadmapValidation }) {
+  const isWarning = validation.validationScore < 70;
+
+  return (
+    <div
+      className={`rounded-xl p-4 space-y-3 ${
+        isWarning ? 'bg-amber-50 border border-amber-200' : 'bg-white border border-slate-200'
+      }`}
+    >
+      <div className="flex items-center justify-between">
+        <h3 className="text-base font-black uppercase tracking-tight text-slate-900">Validation Score</h3>
+        <span
+          className={`text-sm font-bold px-2 py-0.5 rounded-full ${
+            isWarning ? 'bg-amber-100 text-amber-700' : 'bg-indigo-100 text-indigo-700'
+          }`}
+        >
+          {validation.validationScore}
+        </span>
+      </div>
+      <div className="flex flex-wrap gap-2 text-xs">
+        <span
+          className={`font-bold uppercase tracking-wider px-2 py-1 rounded ${
+            validation.confidenceAdjustment === 'Low'
+              ? 'bg-amber-100 text-amber-700'
+              : validation.confidenceAdjustment === 'High'
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-indigo-100 text-indigo-700'
+          }`}
+        >
+          {validation.confidenceAdjustment} Confidence
+        </span>
+        <span
+          className={`font-bold uppercase tracking-wider px-2 py-1 rounded ${
+            validation.scoreProjectionAssessment === 'Realistic'
+              ? 'bg-emerald-100 text-emerald-700'
+              : validation.scoreProjectionAssessment === 'Aggressive'
+                ? 'bg-amber-100 text-amber-700'
+                : 'bg-red-100 text-red-700'
+          }`}
+        >
+          {validation.scoreProjectionAssessment}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function Roadmap() {
   const location = useLocation();
   const { auditId } = useParams<{ auditId?: string }>();
@@ -388,6 +443,7 @@ export default function Roadmap() {
   const state = (location.state ?? {}) as LocationState;
 
   const [roadmap, setRoadmap] = useState<RoadmapResponse | null>(null);
+  const [validation, setValidation] = useState<RoadmapValidation | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [domain, setDomain] = useState('');
@@ -398,6 +454,7 @@ export default function Roadmap() {
     async function run() {
       setIsLoading(true);
       setError(null);
+      setValidation(null);
       setAssetContext(null);
 
       let auditResult: AuditResponse | null = state.auditResult ?? null;
@@ -471,6 +528,30 @@ export default function Roadmap() {
         const data: RoadmapResponse = await res.json();
         console.log('[roadmap] parsed response:', data);
         setRoadmap(data);
+
+        try {
+          const validateRes = await fetch('/api/roadmap-validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              roadmap: data,
+              auditScores: {
+                overallScore: payload.overallScore,
+                signalCoverageScore: payload.signalCoverageScore,
+                citationHealthScore: payload.citationHealthScore,
+                contentDepthScore: payload.contentDepthScore,
+                authoritySignalsScore: payload.authoritySignalsScore,
+              },
+            }),
+            cache: 'no-store',
+          });
+          const validateData = await validateRes.json();
+          if (validateData.success && validateData.validation) {
+            setValidation(validateData.validation);
+          }
+        } catch {
+          /* do not block roadmap; validation is optional */
+        }
       } catch (err: unknown) {
         setError((err as Error)?.message ?? 'Unexpected error generating roadmap');
       } finally {
@@ -533,11 +614,14 @@ export default function Roadmap() {
         {roadmap && (
           <div className="space-y-6">
             {roadmap.scoreProjection && (
+              <>
               <ScoreProjection
                 current={roadmap.scoreProjection.current ?? 0}
                 projected90Day={roadmap.scoreProjection.projected90Day ?? 0}
                 confidence={(roadmap.scoreProjection.confidence as 'Low' | 'Medium' | 'High') ?? 'Medium'}
               />
+              {validation && <ValidationScore validation={validation} />}
+              </>
             )}
 
             {PHASE_LABELS.map(({ key, label, subtitle, title }) => {
