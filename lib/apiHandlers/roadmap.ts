@@ -6,7 +6,27 @@ console.log('🔥 ROADMAP HANDLER EXECUTED');
 function buildPrompt(payload: RoadmapPayload): string {
   return `You are an AI Visibility Strategy Engine.
 
-Based on the following audit results, generate a structured 90-day AI Visibility Execution Roadmap.
+Generate a structured 90-day AI Visibility Execution Roadmap.
+
+IMPORTANT CONSTRAINTS:
+
+Maximum 3 actions per phase.
+
+Each field must be under 180 characters.
+
+Keep explanations concise and operational.
+
+No narrative text.
+
+Return strictly valid JSON only.
+
+No markdown.
+
+No comments.
+
+No truncation.
+
+If unsure, simplify rather than expand.
 
 Audit Data:
 Overall Score: ${payload.overallScore}
@@ -14,28 +34,49 @@ Signal Coverage: ${payload.signalCoverageScore}
 Citation Health: ${payload.citationHealthScore}
 Content Depth: ${payload.contentDepthScore}
 Authority Signals: ${payload.authoritySignalsScore}
-Weak Signals: ${payload.identifiedWeakSignals.join(', ')}
-Schema Types: ${payload.schemaTypes.length > 0 ? payload.schemaTypes.join(', ') : 'none'}
-Key Headings: ${payload.headings.slice(0, 10).join(' | ') || 'none'}
+Weak Signals: ${payload.identifiedWeakSignals.slice(0, 5).join(', ')}
+Schema Types: ${payload.schemaTypes.slice(0, 5).join(', ') || 'none'}
 Domain: ${payload.domain}
-AI Query Pack: ${payload.queryPack.length > 0 ? payload.queryPack.join(' | ') : 'not available'}
-Top Opportunities: ${payload.topOpportunities.length > 0 ? payload.topOpportunities.join('; ') : 'none identified'}
-Page Title: ${payload.extractionSummary.title || 'missing'}
-Meta Description: ${payload.extractionSummary.metaDescription || 'missing'}
-Word Count: ${payload.extractionSummary.wordCount}
+Top Opportunities: ${payload.topOpportunities.slice(0, 5).join('; ') || 'none'}
 
-Instructions:
-- Do not provide generic SEO advice.
-- Focus only on AI answer engine visibility.
-- Prioritise high-leverage structural changes.
-- Sequence actions logically across 3 phases.
-- Avoid marketing language.
-- Be precise and operational.
-- Phase 1 (0-30 days) should focus on Entity Control: schema, identity, canonical.
-- Phase 2 (30-60 days) should focus on Citation Surface Expansion: social verification, sameAs, authority signals.
-- Phase 3 (60-90 days) should focus on Intent Query Domination: content depth, format, query-aligned pages.
-- scoreProjection.projected90Day should reflect realistic improvement if all actions are completed.
-- Return a single valid JSON object only. Do not truncate; include the full response. No markdown or text outside the JSON.`;
+Structure Required:
+
+{
+"scoreProjection": {
+"current": number,
+"projected90Day": number,
+"confidence": "Low" | "Medium" | "High"
+},
+"phase1": {
+"objective": string,
+"actions": [
+{
+"title": string,
+"why": string,
+"expectedImpact": string,
+"difficulty": "Low" | "Medium" | "High"
+}
+]
+},
+"phase2": { ... },
+"phase3": { ... }
+}
+
+Rules:
+
+Focus only on AI answer engine visibility.
+
+No generic SEO.
+
+Phase 1 = Entity Control.
+
+Phase 2 = Citation Surface Expansion.
+
+Phase 3 = Intent Query Domination.
+
+Score projection must be realistic.
+
+Return exactly one valid JSON object.`;
 }
 
 /** Extract JSON from LLM text (strip markdown, find first { to last }) and parse. Throws user-friendly error on invalid JSON. */
