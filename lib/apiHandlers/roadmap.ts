@@ -85,7 +85,13 @@ function getPhase(raw: unknown): RoadmapPhase {
         ? p.steps
         : Array.isArray(p.items)
           ? p.items
-          : [];
+          : Array.isArray(p.recommendations)
+            ? p.recommendations
+            : Array.isArray(p.actionItems)
+              ? p.actionItems
+              : Array.isArray(p.initiatives)
+                ? p.initiatives
+                : [];
   return {
     objective: typeof p.objective === 'string' ? p.objective : '',
     actions: rawActions.map((a: unknown) => normalizeAction(a)),
@@ -100,13 +106,15 @@ function normalizeRoadmapResponse(parsed: unknown): RoadmapResponse {
   const phase3 = obj.phase3 ?? obj.Phase3 ?? obj.phase_3;
   const scoreProjectionRaw = obj.scoreProjection ?? obj.ScoreProjection ?? obj.score_projection;
   const sp = scoreProjectionRaw && typeof scoreProjectionRaw === 'object' ? (scoreProjectionRaw as Record<string, unknown>) : {};
+  const currentNum = sp.current ?? sp.currentScore ?? sp.current_score ?? sp.currentVisibility;
+  const projectedNum = sp.projected90Day ?? sp.projectedScore ?? sp.projected_90_day;
   return {
     phase1: getPhase(phase1),
     phase2: getPhase(phase2),
     phase3: getPhase(phase3),
     scoreProjection: {
-      current: typeof sp.current === 'number' ? sp.current : 0,
-      projected90Day: typeof sp.projected90Day === 'number' ? sp.projected90Day : 0,
+      current: typeof currentNum === 'number' ? currentNum : 0,
+      projected90Day: typeof projectedNum === 'number' ? projectedNum : 0,
       confidence: (typeof sp.confidence === 'string' && ['Low', 'Medium', 'High'].includes(sp.confidence) ? sp.confidence : 'Medium') as 'Low' | 'Medium' | 'High',
     },
   };
@@ -269,6 +277,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     roadmap = normalizeRoadmapResponse(roadmap);
+    if (roadmap.scoreProjection.current === 0 && typeof payload.overallScore === 'number') {
+      roadmap.scoreProjection.current = payload.overallScore;
+    }
     return res.status(200).json(roadmap);
   } catch (err: unknown) {
     const e = err as Error;
@@ -278,6 +289,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         let fallbackRoadmap = await callOpenAI(prompt, openaiKey);
         fallbackRoadmap = normalizeRoadmapResponse(fallbackRoadmap);
+        if (fallbackRoadmap.scoreProjection.current === 0 && typeof payload.overallScore === 'number') {
+          fallbackRoadmap.scoreProjection.current = payload.overallScore;
+        }
         return res.status(200).json(fallbackRoadmap);
       } catch (fallbackErr: unknown) {
         console.error('[roadmap] GPT-4 fallback also failed:', (fallbackErr as Error)?.message);
