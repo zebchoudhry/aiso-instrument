@@ -77,11 +77,18 @@ function normalizeAction(raw: unknown): RoadmapAction {
 
 function getPhase(raw: unknown): RoadmapPhase {
   const p = raw && typeof raw === 'object' ? (raw as Record<string, unknown>) : {};
+  const rawActions = Array.isArray(p.actions)
+    ? p.actions
+    : Array.isArray(p.tasks)
+      ? p.tasks
+      : Array.isArray(p.steps)
+        ? p.steps
+        : Array.isArray(p.items)
+          ? p.items
+          : [];
   return {
     objective: typeof p.objective === 'string' ? p.objective : '',
-    actions: Array.isArray(p.actions)
-      ? p.actions.map((a: unknown) => normalizeAction(a))
-      : [],
+    actions: rawActions.map((a: unknown) => normalizeAction(a)),
   };
 }
 
