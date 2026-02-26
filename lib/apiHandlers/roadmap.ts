@@ -235,6 +235,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Cache-Control', 'no-store');
 
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
@@ -280,7 +281,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (roadmap.scoreProjection.current === 0 && typeof payload.overallScore === 'number') {
       roadmap.scoreProjection.current = payload.overallScore;
     }
-    return res.status(200).json(roadmap);
+    const body = roadmap;
+    console.log('[roadmap] response status 200, body keys:', Object.keys(body));
+    return res.status(200).json(body);
   } catch (err: unknown) {
     const e = err as Error;
     console.error('[roadmap] LLM error:', e?.message);
@@ -292,6 +295,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         if (fallbackRoadmap.scoreProjection.current === 0 && typeof payload.overallScore === 'number') {
           fallbackRoadmap.scoreProjection.current = payload.overallScore;
         }
+        console.log('[roadmap] response status 200 (fallback), body keys:', Object.keys(fallbackRoadmap));
         return res.status(200).json(fallbackRoadmap);
       } catch (fallbackErr: unknown) {
         console.error('[roadmap] GPT-4 fallback also failed:', (fallbackErr as Error)?.message);

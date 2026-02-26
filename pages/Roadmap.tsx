@@ -455,16 +455,22 @@ export default function Roadmap() {
       const payload: RoadmapPayload = buildRoadmapPayload(auditResult, extractionData, queryPackQueries, url, fixLibrary);
 
       try {
-        const res = await fetch('/api/roadmap', {
+        const url = '/api/roadmap';
+        console.log('Calling roadmap endpoint:', url);
+        const res = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload),
+          cache: 'no-store',
         });
+        console.log('[roadmap] fetch status:', res.status);
         if (!res.ok) {
           const body = await res.json().catch(() => ({}));
           throw new Error(body?.details ?? body?.error ?? 'Roadmap generation failed');
         }
-        const data: RoadmapResponse = await res.json();
+        const rawText = await res.text();
+        console.log('[roadmap] raw response length:', rawText?.length ?? 0);
+        const data: RoadmapResponse = JSON.parse(rawText);
         setRoadmap(data);
       } catch (err: unknown) {
         setError((err as Error)?.message ?? 'Unexpected error generating roadmap');
