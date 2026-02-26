@@ -1,6 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import type { RoadmapPayload, RoadmapResponse, RoadmapPhase, RoadmapAction } from '../../types.js';
 
+console.log('🔥 ROADMAP HANDLER EXECUTED');
+
 function buildPrompt(payload: RoadmapPayload): string {
   return `You are an AI Visibility Strategy Engine.
 
@@ -283,6 +285,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     const body = roadmap;
     console.log('[roadmap] response status 200, body keys:', Object.keys(body));
+    console.log('🔥 RETURNING BODY:', body);
     return res.status(200).json(body);
   } catch (err: unknown) {
     const e = err as Error;
@@ -296,6 +299,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           fallbackRoadmap.scoreProjection.current = payload.overallScore;
         }
         console.log('[roadmap] response status 200 (fallback), body keys:', Object.keys(fallbackRoadmap));
+        console.log('🔥 RETURNING BODY:', fallbackRoadmap);
         return res.status(200).json(fallbackRoadmap);
       } catch (fallbackErr: unknown) {
         console.error('[roadmap] GPT-4 fallback also failed:', (fallbackErr as Error)?.message);
