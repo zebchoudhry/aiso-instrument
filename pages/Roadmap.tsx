@@ -468,9 +468,8 @@ export default function Roadmap() {
           const body = await res.json().catch(() => ({}));
           throw new Error(body?.details ?? body?.error ?? 'Roadmap generation failed');
         }
-        const rawText = await res.text();
-        console.log('[roadmap] raw response length:', rawText?.length ?? 0);
-        const data: RoadmapResponse = JSON.parse(rawText);
+        const data: RoadmapResponse = await res.json();
+        console.log('[roadmap] parsed response:', data);
         setRoadmap(data);
       } catch (err: unknown) {
         setError((err as Error)?.message ?? 'Unexpected error generating roadmap');
@@ -543,7 +542,10 @@ export default function Roadmap() {
 
             {PHASE_LABELS.map(({ key, label, subtitle, title }) => {
               const phase = roadmap[key as 'phase1' | 'phase2' | 'phase3'];
-              if (!phase || !phase.actions) return null;
+              if (!phase) return null;
+
+              const actions = Array.isArray(phase.actions) ? phase.actions : [];
+
               return (
                 <PhaseCard
                   key={key}
@@ -552,7 +554,7 @@ export default function Roadmap() {
                   subtitle={subtitle}
                   title={title}
                   objective={phase.objective ?? ''}
-                  actions={Array.isArray(phase.actions) ? phase.actions : []}
+                  actions={actions}
                   assetContext={assetContext}
                 />
               );
