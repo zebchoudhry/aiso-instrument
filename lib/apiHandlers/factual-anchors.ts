@@ -34,8 +34,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(429).json({ error: 'Rate limit exceeded', details: 'Max 10 requests per minute. Please try again later.' });
   }
   res.setHeader('X-RateLimit-Remaining', String(remaining));
-  if (!process.env.GEMINI_API_KEY && !process.env.API_KEY) {
-    return res.status(500).json({ error: 'Server configuration error', details: 'GEMINI_API_KEY or API_KEY is not set' });
+  if (!process.env.GEMINI_API_KEY && !process.env.API_KEY && !process.env.ANTHROPIC_API_KEY) {
+    return res.status(500).json({ error: 'Server configuration error', details: 'GEMINI_API_KEY, API_KEY, or ANTHROPIC_API_KEY is required' });
   }
   try {
     const { brandData, findings } = req.body as {

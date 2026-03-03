@@ -40,9 +40,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(429).json({ error: 'Rate limit exceeded', details: 'Max 10 requests per minute. Please try again later.' });
   }
   res.setHeader('X-RateLimit-Remaining', String(remaining));
-  const apiKey = process.env.GEMINI_API_KEY ?? process.env.API_KEY;
-  if (!apiKey) {
-    return res.status(500).json({ error: 'Server configuration error', details: 'GEMINI_API_KEY or API_KEY is not set' });
+  const geminiKey = process.env.GEMINI_API_KEY ?? process.env.API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  if (!geminiKey && !anthropicKey) {
+    return res.status(500).json({ error: 'Server configuration error', details: 'GEMINI_API_KEY, API_KEY, or ANTHROPIC_API_KEY is required' });
   }
   try {
     const { url, name, extractionData, audit } = req.body as {
@@ -52,11 +53,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'Missing required fields', details: 'url, extractionData, and audit are required' });
     }
     const [findings, queryPack, clientTranslation] = await Promise.all([
-      performDeepDiagnostic(url, name, extractionData, apiKey),
-      generateQueryPack(url, name, extractionData, apiKey),
-      generateClientTranslation(audit, apiKey)
+      performDeepDiagnostic(url, name, extractionData, geminiKey ?? undefined),
+      generateQueryPack(url, name, extractionData, geminiKey ?? undefined),
+      generateClientTranslation(audit, geminiKey ?? undefined)
     ]);
-    const fixLibrary = await generateFixLibrary(findings, apiKey);
+    const fixLibrary = await generateFixLibrary(findings, geminiKey ?? undefined);
     return res.status(200).json({ findings, queryPack, fixLibrary, clientTranslation });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);

@@ -1,4 +1,11 @@
 import { GoogleGenAI, Type } from '@google/genai';
+import {
+  performDeepDiagnosticClaude,
+  generateQueryPackClaude,
+  generateFixLibraryClaude,
+  generateClientTranslationClaude,
+  isGeminiQuotaError,
+} from '../services/claudeService.js';
 import type {
   ExtractionData,
   AuditResponse,
@@ -248,6 +255,10 @@ export async function performDeepDiagnostic(
   extractionData: ExtractionData,
   apiKey?: string
 ): Promise<AuditFinding[]> {
+  const geminiKey = apiKey ?? process.env?.GEMINI_API_KEY ?? process.env?.API_KEY;
+  if (!geminiKey && process.env.ANTHROPIC_API_KEY) {
+    return performDeepDiagnosticClaude(url, name, extractionData);
+  }
   try {
     const ai = getGeminiClient(apiKey);
     const content = (extractionData.mainContent || '').slice(0, 8000);
@@ -298,6 +309,10 @@ Detect up to 6 failure class instances. Return empty array if no significant iss
     const parsed = JSON.parse(text || '{"findings":[]}');
     return Array.isArray(parsed.findings) ? parsed.findings : [];
   } catch (err) {
+    if (isGeminiQuotaError(err) && process.env.ANTHROPIC_API_KEY) {
+      console.warn('[geminiService] performDeepDiagnostic: Gemini quota exceeded, falling back to Claude');
+      return performDeepDiagnosticClaude(url, name, extractionData);
+    }
     console.error('performDeepDiagnostic error:', err);
     return [];
   }
@@ -334,6 +349,10 @@ export async function generateQueryPack(
   extractionData: ExtractionData,
   apiKey?: string
 ): Promise<QueryPackResponse | null> {
+  const geminiKey = apiKey ?? process.env?.GEMINI_API_KEY ?? process.env?.API_KEY;
+  if (!geminiKey && process.env.ANTHROPIC_API_KEY) {
+    return generateQueryPackClaude(url, name, extractionData);
+  }
   try {
     const ai = getGeminiClient(apiKey);
     const content = (extractionData.mainContent || '').slice(0, 6000);
@@ -371,6 +390,10 @@ Return natural-language questions users might ask AI assistants (e.g. "What is X
     const parsed = JSON.parse(text || '{"queries":[]}');
     return { queries: Array.isArray(parsed.queries) ? parsed.queries : [] };
   } catch (err) {
+    if (isGeminiQuotaError(err) && process.env.ANTHROPIC_API_KEY) {
+      console.warn('[geminiService] generateQueryPack: Gemini quota exceeded, falling back to Claude');
+      return generateQueryPackClaude(url, name, extractionData);
+    }
     console.error('generateQueryPack error:', err);
     return null;
   }
@@ -381,6 +404,10 @@ export async function generateFixLibrary(
   apiKey?: string
 ): Promise<FixLibraryResponse | null> {
   if (!findings?.length) return { fixes: [] };
+  const geminiKey = apiKey ?? process.env?.GEMINI_API_KEY ?? process.env?.API_KEY;
+  if (!geminiKey && process.env.ANTHROPIC_API_KEY) {
+    return generateFixLibraryClaude(findings);
+  }
   try {
     const ai = getGeminiClient(apiKey);
     const prompt = `For each audit finding below, provide a specific actionable fix.
@@ -420,6 +447,10 @@ Return fixes in priority order. Each fix must be concrete and implementable.`;
     const parsed = JSON.parse(text || '{"fixes":[]}');
     return { fixes: Array.isArray(parsed.fixes) ? parsed.fixes : [] };
   } catch (err) {
+    if (isGeminiQuotaError(err) && process.env.ANTHROPIC_API_KEY) {
+      console.warn('[geminiService] generateFixLibrary: Gemini quota exceeded, falling back to Claude');
+      return generateFixLibraryClaude(findings);
+    }
     console.error('generateFixLibrary error:', err);
     return null;
   }
@@ -429,6 +460,10 @@ export async function generateClientTranslation(
   audit: AuditResponse,
   apiKey?: string
 ): Promise<ClientTranslationResponse | null> {
+  const geminiKey = apiKey ?? process.env?.GEMINI_API_KEY ?? process.env?.API_KEY;
+  if (!geminiKey && process.env.ANTHROPIC_API_KEY) {
+    return generateClientTranslationClaude(audit);
+  }
   try {
     const ai = getGeminiClient(apiKey);
     const scores = audit.summary?.scores;
@@ -473,6 +508,10 @@ Write 2-3 sentences for summary, 3-5 bullet takeaways, and 2-4 next steps.`;
       nextSteps: Array.isArray(parsed.nextSteps) ? parsed.nextSteps : []
     };
   } catch (err) {
+    if (isGeminiQuotaError(err) && process.env.ANTHROPIC_API_KEY) {
+      console.warn('[geminiService] generateClientTranslation: Gemini quota exceeded, falling back to Claude');
+      return generateClientTranslationClaude(audit);
+    }
     console.error('generateClientTranslation error:', err);
     return null;
   }
