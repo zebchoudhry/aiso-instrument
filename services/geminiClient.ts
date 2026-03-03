@@ -40,17 +40,12 @@ export async function generateHandoverArtifacts(
 }
 
 export async function generateDeploymentChecklist(
-  card: PrescriptionExecutionCard,
-  subjectName: string
+  _card: PrescriptionExecutionCard,
+  _subjectName: string
 ): Promise<DeploymentChecklist> {
-  const res = await fetch('/api/deployment-checklist', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ card, subjectName })
-  });
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({}));
-    throw new Error(data.details ?? data.error ?? res.statusText);
-  }
-  return res.json();
+  // API removed to stay within Vercel Hobby 12-function limit. Returns empty checklist.
+  return {
+    deployment_checklist: [],
+    deployment_notes_guidance: []
+  };
 }
