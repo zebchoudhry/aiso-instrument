@@ -48,6 +48,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (patchBody.clientBriefing !== undefined) updates.client_briefing = patchBody.clientBriefing;
     if (patchBody.queryPack !== undefined) updates.query_pack = patchBody.queryPack;
     if (patchBody.verifications !== undefined) updates.verifications = patchBody.verifications;
+    if (patchBody.aiOutcomeResults !== undefined) updates.ai_outcome_results = patchBody.aiOutcomeResults;
     const { error } = await supabase.from('audits').update(updates).eq('id', id);
     if (error) return res.status(500).json({ error: error.message });
     return res.status(200).json({ ok: true });
@@ -67,7 +68,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           id: data.id, url: data.url, name: data.name, auditResult: data.audit_result,
           extractionData: data.extraction_data ?? null, findings: data.findings,
           fixLibrary: data.fix_library, clientBriefing: data.client_briefing,
-          verifications: data.verifications ?? null, queryPack: data.query_pack ?? null, createdAt: data.created_at,
+          verifications: data.verifications ?? null, queryPack: data.query_pack ?? null,
+          aiOutcomeResults: data.ai_outcome_results ?? null, createdAt: data.created_at,
         });
       }
       let query = supabase.from('audits').select('id, url, name, scores, created_at', { count: 'exact' })

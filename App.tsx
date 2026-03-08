@@ -27,6 +27,7 @@ import WhyThisMattersDisplay from './components/WhyThisMattersDisplay';
 import WhatWillChangeDisplay from './components/WhatWillChangeDisplay';
 import ProofItWorkedDisplay from './components/ProofItWorkedDisplay';
 
+import type { AIAnswerTestResponse } from './types';
 import {
   AuditResponse,
   UserRole,
@@ -113,6 +114,8 @@ const App: React.FC = () => {
   const [whiteLabelConfig, setWhiteLabelConfig] = useState<{ companyName: string; logoUrl: string; primaryColor: string } | null>(null);
   const [lastAuditId, setLastAuditId] = useState<string | null>(null);
   const [queryPackVerifications, setQueryPackVerifications] = useState<Array<{ query: string; result: string | null; pastedResponse?: string }>>([]);
+  const [aiOutcomeResults, setAiOutcomeResults] = useState<AIAnswerTestResponse | null>(null);
+  const [aiOutcomeLoading, setAiOutcomeLoading] = useState(false);
 
   useEffect(() => {
     fetch('/api/config')
@@ -432,6 +435,7 @@ const App: React.FC = () => {
     setCompetitorUrl('');
     setErrorMessage(null);
     setUsePasteFallback(false);
+    setAiOutcomeResults(null);
   };
 
   const handleCompetitiveCompare = async () => {
@@ -587,6 +591,8 @@ const App: React.FC = () => {
             isQueryLoading={isQueryLoading}
             isFixLoading={isFixLoading}
             isBriefLoading={isBriefLoading}
+            aiOutcomeResults={aiOutcomeResults}
+            aiOutcomeLoading={aiOutcomeLoading}
           >
             {errorMessage && (
               <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-sm text-red-700">
@@ -618,6 +624,19 @@ const App: React.FC = () => {
               data={queryPack}
               isLoading={isQueryLoading}
               auditId={lastAuditId}
+              brandName={observedAudit?.summary?.subjectName ?? undefined}
+              domain={observedAudit?.summary?.url ? getHostname(observedAudit.summary.url) : undefined}
+              onOutcomeResults={(response) => {
+                setAiOutcomeResults(response);
+                if (lastAuditId) {
+                  fetch('/api/audits', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id: lastAuditId, aiOutcomeResults: response }),
+                  }).catch(() => {});
+                }
+              }}
+              onOutcomeLoadingChange={setAiOutcomeLoading}
               onVerificationChange={(verifications) => {
                 setQueryPackVerifications(verifications);
                 if (lastAuditId && verifications.some((v) => v.result || v.pastedResponse)) {

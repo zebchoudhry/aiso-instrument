@@ -348,3 +348,30 @@ export interface RoadmapPayload {
   domain: string;
   queryPack: string[];
 }
+
+// --- AI Outcome Validation / Answer Test ---
+
+export interface AIAnswerTestRequest {
+  queries: string[];
+  brandName: string;
+  domain: string;
+}
+
+export interface AIAnswerTestResult {
+  query: string;
+  answer: string;
+  brandMentioned: boolean;
+  brandCited: boolean;
+  competitors: string[];
+}
+
+export interface AIAnswerTestSummary {
+  queriesTested: number;
+  brandMentionRate: number;
+  brandCitationRate: number;
+}
+
+export interface AIAnswerTestResponse {
+  results: AIAnswerTestResult[];
+  summary: AIAnswerTestSummary;
+}

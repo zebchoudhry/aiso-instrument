@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AuditResponse, DeepSynthesis } from '../types';
+import { AuditResponse, DeepSynthesis, AIAnswerTestResponse } from '../types';
 import ScoreCard from './ScoreCard';
+import AIOutcomePanel from './AIOutcomePanel';
 import { getPercentileLabel } from '../lib/benchmark';
 
 interface ResultDashboardProps {
@@ -18,6 +19,8 @@ interface ResultDashboardProps {
   isFixLoading?: boolean;
   isBriefLoading?: boolean;
   onUnlockSearch?: () => void;
+  aiOutcomeResults?: AIAnswerTestResponse | null;
+  aiOutcomeLoading?: boolean;
   children?: React.ReactNode;
 }
 
@@ -44,6 +47,8 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
   isFixLoading = false,
   isBriefLoading = false,
   onUnlockSearch,
+  aiOutcomeResults = null,
+  aiOutcomeLoading = false,
   children
 }) => {
   if (!observed) return null;
@@ -120,6 +125,22 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
         <ScoreCard label="Compressibility" score={readiness.breakdown.compressibility.score} colorClass="text-slate-900" description={readiness.breakdown.compressibility.explanation} />
         <ScoreCard label="Corroboration" score={readiness.breakdown.corroboration.score} colorClass="text-slate-900" description={readiness.breakdown.corroboration.explanation} />
       </div>
+      )}
+
+      {/* AI Outcome Validation */}
+      {aiOutcomeResults || aiOutcomeLoading ? (
+        <AIOutcomePanel
+          results={aiOutcomeResults?.results ?? null}
+          summary={aiOutcomeResults?.summary ?? null}
+          isLoading={aiOutcomeLoading}
+        />
+      ) : (
+        <section className="space-y-2 pt-12 border-t border-slate-200">
+          <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">AI Outcome Validation</h3>
+          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+            Run AI Outcome Test from the Query Pack below to measure recommendation outcomes.
+          </p>
+        </section>
       )}
 
       {/* Market Synthesis / Key Selection Logic */}

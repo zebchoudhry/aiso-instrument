@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { QueryPackResponse } from '../types';
+import React, { useState, useEffect } from 'react';
+import { QueryPackResponse, AIAnswerTestResponse } from '../types';
 
 export type VerificationStatus = 'cited' | 'mentioned' | 'not_found' | null;
 
@@ -15,6 +15,10 @@ interface QueryPackDisplayProps {
   auditId?: string | null;
   initialVerifications?: VerificationEntry[] | null;
   onVerificationChange?: (verifications: VerificationEntry[]) => void;
+  brandName?: string;
+  domain?: string;
+  onOutcomeResults?: (response: AIAnswerTestResponse) => void;
+  onOutcomeLoadingChange?: (loading: boolean) => void;
 }
 
 const QueryPackDisplay: React.FC<QueryPackDisplayProps> = ({
@@ -23,9 +27,14 @@ const QueryPackDisplay: React.FC<QueryPackDisplayProps> = ({
   auditId,
   initialVerifications,
   onVerificationChange,
+  brandName,
+  domain,
+  onOutcomeResults,
+  onOutcomeLoadingChange,
 }) => {
   const [verification, setVerification] = useState<Record<number, VerificationStatus>>({});
   const [pastedResponses, setPastedResponses] = useState<Record<number, string>>({});
+  const [isOutcomeLoading, setIsOutcomeLoading] = useState(false);
 
   const queries = (data?.queries ?? data?.query_pack ?? []).map((item: string | { query?: string; intent?: string }) =>
     typeof item === 'string' ? item : item?.query ?? ''
@@ -75,6 +84,30 @@ const QueryPackDisplay: React.FC<QueryPackDisplayProps> = ({
     } catch (_) {}
   };
 
+  const runOutcomeTest = async () => {
+    if (!queries.length || !brandName || !domain || !onOutcomeResults) return;
+    setIsOutcomeLoading(true);
+    onOutcomeLoadingChange?.(true);
+    try {
+      const res = await fetch('/api/audit-enrich', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ queries, brandName, domain }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.details ?? err?.error ?? 'AI Outcome Test failed');
+      }
+      const response: AIAnswerTestResponse = await res.json();
+      onOutcomeResults(response);
+    } catch (e) {
+      console.error('[QueryPackDisplay] Outcome test failed:', e);
+    } finally {
+      setIsOutcomeLoading(false);
+      onOutcomeLoadingChange?.(false);
+    }
+  };
+
   if (!data && !isLoading) return null;
 
   return (
@@ -85,7 +118,16 @@ const QueryPackDisplay: React.FC<QueryPackDisplayProps> = ({
           <h3 className="text-3xl font-black text-slate-900 uppercase tracking-tighter leading-none">LLM Retrieval Query Pack</h3>
           <p className="text-xs font-bold text-slate-400 italic">Ask these in ChatGPT / Perplexity — mark results to track AI visibility.</p>
         </div>
-        <div className="text-right">
+        <div className="flex flex-col items-end gap-2">
+          {queries.length > 0 && brandName && domain && onOutcomeResults && (
+            <button
+              onClick={runOutcomeTest}
+              disabled={isOutcomeLoading || !queries.length}
+              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
+            >
+              {isOutcomeLoading ? 'Running…' : 'Run AI Outcome Test'}
+            </button>
+          )}
           {queries.length > 0 && testedCount > 0 && (
             <div className="text-[10px] font-bold text-slate-600 mb-2">
               Cited {citedCount} · Mentioned {mentionedCount} · Not found {notFoundCount}

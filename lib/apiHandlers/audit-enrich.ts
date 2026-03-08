@@ -33,6 +33,10 @@ function getIdentifier(req: VercelRequest): string {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const { allowed, remaining } = checkRateLimit(getIdentifier(req));
   if (!allowed) {
@@ -40,6 +44,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(429).json({ error: 'Rate limit exceeded', details: 'Max 10 requests per minute. Please try again later.' });
   }
   res.setHeader('X-RateLimit-Remaining', String(remaining));
+
+  const body = req.body as Record<string, unknown>;
+  const isAiAnswerTest = Array.isArray(body?.queries) && typeof body?.brandName === 'string' && typeof body?.domain === 'string';
+  if (isAiAnswerTest) {
+    const aiAnswerTestHandler = (await import('./ai-answer-test.js')).default;
+    return aiAnswerTestHandler(req, res);
+  }
+
   const geminiKey = process.env.GEMINI_API_KEY ?? process.env.API_KEY;
   const anthropicKey = process.env.ANTHROPIC_API_KEY;
   if (!geminiKey && !anthropicKey) {
