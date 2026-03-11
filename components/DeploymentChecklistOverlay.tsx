@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { DeploymentChecklist } from '../types';
+import CitationIQLogo from './CitationIQLogo';
+import { SectionIntro } from './VisualSystem';
 
 interface DeploymentChecklistOverlayProps {
   checklist: DeploymentChecklist | null;
@@ -28,19 +30,21 @@ const DeploymentChecklistOverlay: React.FC<DeploymentChecklistOverlayProps> = ({
       <div className="bg-white w-full max-w-2xl rounded-[3rem] shadow-2xl overflow-hidden flex flex-col border border-slate-200 animate-in zoom-in-95 duration-500">
         
         {/* Header */}
-        <div className="p-10 bg-emerald-600 text-white">
+        <div className="p-10 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.28),transparent_32%),linear-gradient(180deg,#052e24_0%,#065f46_65%,#064e3b_100%)] text-white">
           <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-              </svg>
+            <div>
+              <CitationIQLogo theme="light" size="sm" />
             </div>
             <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
-          <h3 className="text-2xl font-black uppercase tracking-tight mb-2">Human Deployment Verification</h3>
-          <p className="text-emerald-100 text-[10px] font-bold uppercase tracking-[0.3em]">Guardrail: Assets Generated → Deployed</p>
+          <SectionIntro
+            label="Deployment Verification"
+            title="Human deployment verification"
+            description="Confirm the generated assets were actually implemented before you move into the next verification stage."
+            invert
+          />
         </div>
 
         <div className="flex-1 overflow-y-auto p-10 space-y-10">

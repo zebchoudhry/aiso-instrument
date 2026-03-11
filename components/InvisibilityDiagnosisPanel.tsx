@@ -1,5 +1,6 @@
 import React from 'react';
 import type { DiagnosisResult } from '../types';
+import { SectionIntro, SurfaceCard } from './VisualSystem';
 
 interface InvisibilityDiagnosisPanelProps {
   diagnosis: DiagnosisResult;
@@ -17,21 +18,17 @@ export default function InvisibilityDiagnosisPanel({
   } as const;
 
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl p-6 space-y-4">
-      <div className="space-y-2">
-        <p className="text-[10px] font-black text-indigo-600 uppercase tracking-widest">
-          CitationIQ Diagnosis
-        </p>
-        <h2 className="text-xl font-black uppercase tracking-tight text-slate-900">
-          {title}
-        </h2>
-        <p className="text-sm text-slate-600">{diagnosis.summary}</p>
-      </div>
+    <SurfaceCard className="p-8 space-y-6">
+      <SectionIntro
+        label="CitationIQ Diagnosis"
+        title={title}
+        description={diagnosis.summary}
+      />
 
       {diagnosis.items.length > 0 && (
         <div className="grid gap-4">
           {diagnosis.items.map((item) => (
-            <div key={item.key} className="rounded-2xl border border-slate-200 p-5 space-y-4 bg-slate-50">
+            <div key={item.key} className="rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 space-y-4 shadow-sm">
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div className="space-y-1">
                   <h3 className="text-sm font-black uppercase tracking-tight text-slate-900">
@@ -72,12 +69,12 @@ export default function InvisibilityDiagnosisPanel({
       )}
 
       {diagnosis.causes.length > 0 && (
-        <ul className="space-y-2 text-sm text-slate-700 list-disc list-inside">
+        <ul className="space-y-2 text-sm text-slate-700 list-disc list-inside rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5">
           {diagnosis.causes.map((cause) => (
             <li key={cause}>{cause}</li>
           ))}
         </ul>
       )}
-    </div>
+    </SurfaceCard>
   );
 }

@@ -4,6 +4,8 @@ import type { DiagnosisResult, RoadmapResponse, RoadmapAction, RoadmapPayload, A
 import { buildRoadmapPayload } from '../lib/roadmapPayload';
 import { SchemaGenerator } from '../services/schemaGenerator';
 import InvisibilityDiagnosisPanel from '../components/InvisibilityDiagnosisPanel';
+import CitationIQLogo from '../components/CitationIQLogo';
+import { SectionIntro, SurfaceCard } from '../components/VisualSystem';
 
 interface LocationState {
   auditResult?: AuditResponse;
@@ -135,14 +137,14 @@ function PhaseCard({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+    <SurfaceCard className="overflow-hidden">
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="w-full flex items-center justify-between px-4 py-3 hover:bg-slate-50 transition-colors text-left"
+        className="w-full flex items-center justify-between px-6 py-5 hover:bg-slate-50 transition-colors text-left"
       >
         <div className="flex items-center gap-2">
-          <div className="bg-indigo-600 text-white text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-full">
+          <div className="rounded-full bg-indigo-600 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-white">
             {label}
           </div>
           <div>
@@ -161,8 +163,8 @@ function PhaseCard({
       </button>
 
       {open && (
-        <div className="px-4 pb-4 space-y-3">
-          <p className="text-xs text-slate-600 border-l-4 border-indigo-200 pl-3 py-0.5">{objective}</p>
+        <div className="space-y-3 px-6 pb-6">
+          <p className="border-l-4 border-indigo-200 py-0.5 pl-3 text-xs text-slate-600">{objective}</p>
 
           <div className="space-y-3">
             {actions.map((action, i) => (
@@ -171,7 +173,7 @@ function PhaseCard({
           </div>
         </div>
       )}
-    </div>
+    </SurfaceCard>
   );
 }
 
@@ -296,7 +298,7 @@ function ActionCard({
 
   return (
     <>
-      <div className="bg-slate-50 rounded-xl p-4 space-y-2">
+      <div className="space-y-3 rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 shadow-sm">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className="w-5 h-5 rounded-full bg-indigo-600 text-white text-[10px] font-black flex items-center justify-center flex-shrink-0">
@@ -311,7 +313,7 @@ function ActionCard({
           </span>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-3 text-xs text-slate-600 pl-8">
+        <div className="grid gap-3 pl-8 text-xs text-slate-600 md:grid-cols-2">
           <div>
             <span className="font-bold uppercase tracking-wider text-slate-400 block mb-1">Why</span>
             <p>{action.why}</p>
@@ -322,7 +324,7 @@ function ActionCard({
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-3 text-xs pl-8">
+        <div className="grid gap-3 pl-8 text-xs md:grid-cols-3">
           <div className="rounded-xl border border-slate-200 bg-white p-3">
             <span className="font-bold uppercase tracking-wider text-slate-400 block mb-1">Owner</span>
             <p className="text-slate-900 font-semibold">{owner}</p>
@@ -337,7 +339,7 @@ function ActionCard({
           </div>
         </div>
 
-        <div className="grid md:grid-cols-2 gap-3 text-xs text-slate-600 pl-8">
+        <div className="grid gap-3 pl-8 text-xs text-slate-600 md:grid-cols-2">
           <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
             <span className="font-bold uppercase tracking-wider text-emerald-700 block mb-1">Proof Of Done</span>
             <p className="text-slate-700">{proofOfDone}</p>
@@ -361,8 +363,8 @@ function ActionCard({
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50" onClick={handleCloseModal}>
-          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+          <div className="flex max-h-[90vh] w-full max-w-lg flex-col overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-xl" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between border-b border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#eef2ff_100%)] px-6 py-5">
               <h3 className="text-sm font-black uppercase tracking-tight text-slate-900">Generate deployable asset</h3>
               <button type="button" onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600 p-1">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
@@ -441,7 +443,7 @@ function ScoreProjection({ current, projected90Day, confidence }: { current: num
   const barProjected = Math.min(100, projected90Day);
 
   return (
-    <div className="bg-slate-900 text-white rounded-xl p-4 space-y-4">
+    <SurfaceCard tone="dark" className="space-y-4 p-6">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-base font-black uppercase tracking-tight">Score Projection</h3>
@@ -474,19 +476,18 @@ function ScoreProjection({ current, projected90Day, confidence }: { current: num
           Potential gain of <span className="text-indigo-400 font-black">+{gain} points</span> over 90 days.
         </p>
       )}
-    </div>
+    </SurfaceCard>
   );
 }
 
 function VerificationPlan() {
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
-      <div>
-        <h3 className="text-base font-black uppercase tracking-tight text-slate-900">Before/After Verification Plan</h3>
-        <p className="text-xs text-slate-500 mt-1">
-          Use this sequence to prove the roadmap created measurable visibility improvement.
-        </p>
-      </div>
+    <SurfaceCard className="space-y-4 p-6">
+      <SectionIntro
+        label="Verification Plan"
+        title="Before and after proof sequence"
+        description="Use this sequence to prove the roadmap created measurable visibility improvement."
+      />
       <div className="grid gap-3 md:grid-cols-4">
         {[
           'Implement the highest-priority actions first.',
@@ -502,7 +503,7 @@ function VerificationPlan() {
           </div>
         ))}
       </div>
-    </div>
+    </SurfaceCard>
   );
 }
 
@@ -511,7 +512,7 @@ function ValidationScore({ validation }: { validation: RoadmapValidation }) {
 
   return (
     <div
-      className={`rounded-xl p-4 space-y-3 ${
+      className={`space-y-3 rounded-[2rem] p-5 ${
         isWarning ? 'bg-amber-50 border border-amber-200' : 'bg-white border border-slate-200'
       }`}
     >
@@ -684,7 +685,7 @@ export default function Roadmap() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-4xl mx-auto px-4 py-10 space-y-8">
+      <div className="max-w-5xl mx-auto px-4 py-10 space-y-8">
         <div className="flex items-center justify-between">
           <Link to="/" className="text-[10px] font-bold uppercase tracking-widest text-indigo-600 hover:text-indigo-800">
             Back to Audit
@@ -694,25 +695,34 @@ export default function Roadmap() {
           )}
         </div>
 
+        <SurfaceCard tone="dark" className="p-8 md:p-10">
+          <div className="space-y-5">
+            <CitationIQLogo theme="light" size="md" />
+            <SectionIntro
+              label="90-Day Visibility Growth Plan"
+              title="Turn diagnosis into a focused rollout"
+              description={auditName ? `${auditName} roadmap with phased actions, verification steps, and projected score movement.` : 'Your roadmap is built from the audit diagnosis, fix priorities, and visibility opportunities.'}
+              invert
+            />
+          </div>
+        </SurfaceCard>
+
         <div>
-          <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-slate-900">
-            90-Day Visibility Growth Plan
-          </h1>
           {auditName && (
             <p className="text-sm text-slate-500 mt-1">{auditName}</p>
           )}
         </div>
 
         {isLoading && (
-          <div className="bg-white border border-slate-200 rounded-[2rem] p-16 flex flex-col items-center gap-4">
+          <SurfaceCard className="flex flex-col items-center gap-4 p-16">
             <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
             <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Building Your Plan…</p>
             <p className="text-xs text-slate-400">This takes 10–20 seconds</p>
-          </div>
+          </SurfaceCard>
         )}
 
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-6">
+          <div className="rounded-[2rem] border border-red-200 bg-red-50 p-6">
             <p className="font-bold text-red-700 text-sm uppercase tracking-wide mb-1">Error</p>
             <p className="text-sm text-red-600">{error}</p>
             <Link to="/" className="mt-4 inline-block text-xs font-bold text-indigo-600 hover:underline">
@@ -722,13 +732,13 @@ export default function Roadmap() {
         )}
 
         {!isLoading && !error && !roadmap && !auditId && !state.auditResult && (
-          <div className="bg-white border border-slate-200 rounded-[2rem] p-12 text-center space-y-4">
+          <SurfaceCard className="space-y-4 p-12 text-center">
             <h2 className="text-xl font-black uppercase tracking-tight text-slate-900">No Audit Data</h2>
             <p className="text-sm text-slate-500">Run an audit first, then click "View Roadmap" to build your action plan.</p>
             <Link to="/" className="inline-block mt-2 bg-indigo-600 text-white text-xs font-black uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors">
               Run Audit
             </Link>
-          </div>
+          </SurfaceCard>
         )}
 
         {roadmap && (

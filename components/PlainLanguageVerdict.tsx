@@ -1,5 +1,6 @@
 import React from 'react';
 import type { AuditResponse } from '../types';
+import { SurfaceCard } from './VisualSystem';
 
 interface PlainLanguageVerdictProps {
   audit: AuditResponse | null;
@@ -30,7 +31,7 @@ export default function PlainLanguageVerdict({ audit }: PlainLanguageVerdictProp
   }
 
   return (
-    <div className="bg-white border-2 border-indigo-200 rounded-2xl p-6 text-slate-800">
+    <SurfaceCard tone="soft" className="p-6 text-slate-800">
       <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-600 mb-2">Plain-language verdict</h3>
       <p className="text-lg font-bold leading-relaxed">
         {subject} is{' '}
@@ -38,6 +39,6 @@ export default function PlainLanguageVerdict({ audit }: PlainLanguageVerdictProp
         {' '}to AI search.
       </p>
       <p className="text-sm text-slate-600 mt-2">{sentence}</p>
-    </div>
+    </SurfaceCard>
   );
 }

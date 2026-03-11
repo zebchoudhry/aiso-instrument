@@ -2,6 +2,8 @@
 import React, { useState } from 'react';
 import { DiagnosticReport } from '../types';
 import { ReportService } from '../services/reportService';
+import CitationIQLogo from './CitationIQLogo';
+import { SectionIntro } from './VisualSystem';
 
 interface ReportOverlayProps {
   report: DiagnosticReport | null;
@@ -27,19 +29,19 @@ const ReportOverlay: React.FC<ReportOverlayProps> = ({ report, onClose }) => {
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-6 animate-in fade-in duration-300">
       <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
-        <div className="bg-indigo-600 p-10 text-white">
+        <div className="bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.28),transparent_32%),linear-gradient(180deg,#08112e_0%,#0b1537_60%,#0f172a_100%)] p-10 text-white">
           <div className="flex justify-between items-start mb-6">
-            <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-              </svg>
-            </div>
+            <CitationIQLogo theme="light" size="sm" />
             <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
           </div>
-          <h3 className="text-2xl font-black uppercase tracking-tight mb-2">Report Delivered</h3>
-          <p className="text-indigo-100 text-xs font-bold uppercase tracking-widest opacity-80">Authority Snapshot {report.reportId}</p>
+          <SectionIntro
+            label={`Authority Snapshot ${report.reportId}`}
+            title="Report delivered"
+            description="Your report is ready to review, share, and download."
+            invert
+          />
         </div>
 
         <div className="p-10 space-y-8">

@@ -1,5 +1,6 @@
 import React from 'react';
 import type { AIAnswerTestResult, AIAnswerTestSummary } from '../types';
+import { SectionIntro, SurfaceCard } from './VisualSystem';
 
 interface AIOutcomePanelProps {
   results: AIAnswerTestResult[] | null;
@@ -11,13 +12,17 @@ const AIOutcomePanel: React.FC<AIOutcomePanelProps> = ({ results, summary, isLoa
   if (isLoading) {
     return (
       <section className="space-y-6 pt-12 border-t border-slate-200">
-        <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">AI Outcome Validation</h3>
-        <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col items-center justify-center py-20 space-y-6">
+        <SectionIntro
+          label="AI Outcome Validation"
+          title="Measure recommendation outcomes"
+          description="CitationIQ is running the AI outcome test across your saved query set."
+        />
+        <SurfaceCard className="flex flex-col items-center justify-center space-y-6 p-10 py-20">
           <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
           <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] animate-pulse">
             Running AI Outcome Test...
           </p>
-        </div>
+        </SurfaceCard>
       </section>
     );
   }
@@ -26,11 +31,15 @@ const AIOutcomePanel: React.FC<AIOutcomePanelProps> = ({ results, summary, isLoa
 
   return (
     <section className="space-y-6 pt-12 border-t border-slate-200">
-      <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">AI Outcome Validation</h3>
+      <SectionIntro
+        label="AI Outcome Validation"
+        title="Measure recommendation outcomes"
+        description="Track whether AI systems now mention and cite your brand more often for the queries that matter."
+      />
 
       {summary && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col items-center text-center">
+          <SurfaceCard className="flex flex-col items-center p-8 text-center">
             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">AI Recommendation Visibility</span>
             <div className="text-4xl font-mono font-black tracking-tighter text-slate-900">
               {(summary.brandMentionRate * 100).toFixed(1)}%
@@ -38,8 +47,8 @@ const AIOutcomePanel: React.FC<AIOutcomePanelProps> = ({ results, summary, isLoa
             <p className="mt-2 text-[10px] text-slate-500 uppercase font-medium tracking-tight">
               Brand mentioned in {summary.queriesTested} tested queries
             </p>
-          </div>
-          <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col items-center text-center">
+          </SurfaceCard>
+          <SurfaceCard className="flex flex-col items-center p-8 text-center">
             <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Brand Citation Rate</span>
             <div className="text-4xl font-mono font-black tracking-tighter text-slate-900">
               {(summary.brandCitationRate * 100).toFixed(1)}%
@@ -47,12 +56,12 @@ const AIOutcomePanel: React.FC<AIOutcomePanelProps> = ({ results, summary, isLoa
             <p className="mt-2 text-[10px] text-slate-500 uppercase font-medium tracking-tight">
               Brand cited/linked in AI responses
             </p>
-          </div>
+          </SurfaceCard>
         </div>
       )}
 
       {results && results.length > 0 && (
-        <div className="bg-white p-10 rounded-[2.5rem] border border-slate-200 shadow-sm overflow-hidden">
+        <SurfaceCard className="overflow-hidden p-10">
           <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-6">Per-Query Results</h4>
           <div className="overflow-x-auto">
             <table className="w-full text-left">
@@ -88,7 +97,7 @@ const AIOutcomePanel: React.FC<AIOutcomePanelProps> = ({ results, summary, isLoa
               </tbody>
             </table>
           </div>
-        </div>
+        </SurfaceCard>
       )}
     </section>
   );

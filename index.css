@@ -5,8 +5,14 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    background:
+      radial-gradient(circle at top, rgba(99, 102, 241, 0.08), transparent 28%),
+      #f8fafc;
+  }
+
   body {
-    @apply bg-slate-50 text-slate-900 antialiased;
+    @apply bg-transparent text-slate-900 antialiased;
     font-family: 'Inter', sans-serif;
   }
 }

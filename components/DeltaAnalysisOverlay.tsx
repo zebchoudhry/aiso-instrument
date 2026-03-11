@@ -1,6 +1,8 @@
 
 import React, { useState } from 'react';
 import { AuditDelta, ExecutiveReport } from '../types';
+import CitationIQLogo from './CitationIQLogo';
+import { SectionIntro, SurfaceCard } from './VisualSystem';
 
 interface DeltaAnalysisOverlayProps {
   delta: AuditDelta | null;
@@ -19,11 +21,18 @@ const DeltaAnalysisOverlay: React.FC<DeltaAnalysisOverlayProps> = ({ delta, exec
       <div className="bg-slate-50 w-full max-w-4xl h-[85vh] rounded-[3rem] shadow-2xl overflow-hidden flex flex-col border border-slate-200 animate-in zoom-in-95 duration-500">
         
         {/* Clinical Header */}
-        <div className="p-10 bg-slate-900 text-white border-b-4 border-indigo-500">
+        <div className="p-10 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.22),transparent_32%),linear-gradient(180deg,#08112e_0%,#0b1537_60%,#0f172a_100%)] text-white border-b border-white/10">
           <div className="flex justify-between items-center mb-6">
             <div>
-              <div className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-2">Re-Audit Instrumentation</div>
-              <h3 className="text-3xl font-black uppercase tracking-tight">Observable Delta Analysis</h3>
+              <CitationIQLogo theme="light" size="sm" />
+              <div className="mt-6">
+                <SectionIntro
+                  label="Re-Audit Instrumentation"
+                  title="Observable delta analysis"
+                  description="Compare before and after audit results to see what measurably changed."
+                  invert
+                />
+              </div>
             </div>
             <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -81,7 +90,7 @@ const DeltaAnalysisOverlay: React.FC<DeltaAnalysisOverlayProps> = ({ delta, exec
                       { label: 'AI Visibility', data: delta.delta_summary.ai_visibility },
                       { label: 'Citation Likelihood', data: delta.delta_summary.citation_likelihood }
                     ].map((item) => (
-                      <div key={item.label} className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm relative overflow-hidden">
+                      <SurfaceCard key={item.label} className="relative overflow-hidden p-8">
                         <div className="absolute top-0 right-0 p-4">
                           <span className={`text-[10px] font-black uppercase px-3 py-1 rounded-full ${item.data.direction.includes('increase') ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-slate-50 text-slate-400 border border-slate-100'}`}>
                             {item.data.direction}
@@ -101,7 +110,7 @@ const DeltaAnalysisOverlay: React.FC<DeltaAnalysisOverlayProps> = ({ delta, exec
                             <div className="text-3xl font-mono font-black text-slate-900">{item.data.after}</div>
                           </div>
                         </div>
-                      </div>
+                      </SurfaceCard>
                     ))}
                   </section>
 
@@ -126,7 +135,7 @@ const DeltaAnalysisOverlay: React.FC<DeltaAnalysisOverlayProps> = ({ delta, exec
                   </section>
 
                   {/* Static Elements */}
-                  <section className="bg-slate-900 rounded-[2.5rem] p-10 text-white">
+                    <SurfaceCard tone="dark" className="p-10">
                     <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-8">Unchanged Structural Barriers</h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {delta.unchanged_elements.map((el, i) => (
@@ -135,11 +144,11 @@ const DeltaAnalysisOverlay: React.FC<DeltaAnalysisOverlayProps> = ({ delta, exec
                         </div>
                       ))}
                     </div>
-                  </section>
+                  </SurfaceCard>
 
                   {/* Guidance Block */}
                   <section className="space-y-6">
-                    <div className="p-8 bg-indigo-50 border border-indigo-100 rounded-[2rem] space-y-4">
+                    <SurfaceCard tone="soft" className="space-y-4 p-8">
                       <h5 className="text-[10px] font-black text-indigo-900 uppercase tracking-widest">Next Verification Steps</h5>
                       <ul className="space-y-3">
                         {delta.next_verification_guidance.map((g, i) => (
@@ -148,7 +157,7 @@ const DeltaAnalysisOverlay: React.FC<DeltaAnalysisOverlayProps> = ({ delta, exec
                           </li>
                         ))}
                       </ul>
-                    </div>
+                    </SurfaceCard>
                     <div className="text-center italic opacity-60">
                       <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Auditor Confidence: {delta.confidence_note}</p>
                     </div>
@@ -191,7 +200,7 @@ const DeltaAnalysisOverlay: React.FC<DeltaAnalysisOverlayProps> = ({ delta, exec
                     </div>
                   </section>
 
-                  <section className="bg-slate-50 p-10 rounded-[2.5rem] border border-slate-200 flex flex-col items-center text-center space-y-4">
+                  <SurfaceCard className="flex flex-col items-center space-y-4 p-10 text-center">
                     <h5 className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Epistemic Constraint</h5>
                     <p className="text-xs font-bold text-slate-500 max-w-xl italic">
                       {executiveBrief.executive_summary.interpretation_boundary}
@@ -199,7 +208,7 @@ const DeltaAnalysisOverlay: React.FC<DeltaAnalysisOverlayProps> = ({ delta, exec
                     <div className="mt-4 px-6 py-2 bg-slate-900 text-white rounded-full text-[10px] font-black uppercase tracking-widest">
                       Next Review Window: {executiveBrief.executive_summary.recommended_next_review_window}
                     </div>
-                  </section>
+                  </SurfaceCard>
                 </div>
               )
             )

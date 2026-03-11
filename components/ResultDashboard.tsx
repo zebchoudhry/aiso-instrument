@@ -5,6 +5,8 @@ import ScoreCard from './ScoreCard';
 import AIOutcomePanel from './AIOutcomePanel';
 import InvisibilityDiagnosisPanel from './InvisibilityDiagnosisPanel';
 import { getPercentileLabel } from '../lib/benchmark';
+import CitationIQLogo from './CitationIQLogo';
+import { SectionIntro, SurfaceCard } from './VisualSystem';
 
 interface ResultDashboardProps {
   observed: AuditResponse | null;
@@ -27,7 +29,7 @@ interface ResultDashboardProps {
 }
 
 const TaskStatus: React.FC<{ label: string; active: boolean; complete: boolean }> = ({ label, active, complete }) => (
-  <div className="flex items-center space-x-3 px-4 py-2 bg-slate-50 border border-slate-100 rounded-xl">
+  <div className="flex items-center space-x-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm">
     <div className={`w-1.5 h-1.5 rounded-full ${complete ? 'bg-emerald-500' : active ? 'bg-indigo-500 animate-pulse' : 'bg-slate-300'}`}></div>
     <span className={`text-[9px] font-black uppercase tracking-widest ${complete ? 'text-slate-900' : active ? 'text-indigo-600' : 'text-slate-400'}`}>
       {label}
@@ -125,7 +127,8 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
       
       {/* Background Task Tracking HUD */}
       {isBackgroundActive && (
-        <div className="bg-white border border-indigo-100 p-6 rounded-[2.5rem] shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
+        <SurfaceCard tone="soft" className="p-6">
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col">
             <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">CitationIQ Analysis Progress</span>
             <span className="text-[8px] font-bold text-slate-400 uppercase">Turning raw signals into actions you can use...</span>
@@ -136,46 +139,49 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
              <TaskStatus label="Opportunity Scan" active={isQueryLoading} complete={!isQueryLoading} />
              <TaskStatus label="Action Plan" active={isFixLoading} complete={!isFixLoading} />
           </div>
-        </div>
+          </div>
+        </SurfaceCard>
       )}
 
       {/* Tier-1 Verdict & High-Level Score */}
-      <div className={`p-12 rounded-[3.5rem] border-b-8 shadow-2xl transition-all duration-700 ${isLowMaturity ? 'bg-slate-900 border-rose-600 text-white' : 'bg-white border-emerald-500 text-slate-900'}`}>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+      <SurfaceCard tone="dark" className="p-8 md:p-12">
+        <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start">
           <div className="space-y-6">
-            <div className="flex flex-col space-y-2">
-              <div className="flex items-center space-x-2 opacity-50">
-                 <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">{observed.summary.subjectName ?? observed.summary.url}</span>
+            <div className="flex flex-col space-y-4">
+              <CitationIQLogo theme="light" size="md" />
+              <div className="flex items-center space-x-2 opacity-70">
+                 <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">{observed.summary.subjectName ?? observed.summary.url}</span>
               </div>
-              <h2 className="text-4xl font-black uppercase tracking-tighter leading-none">
+              <h2 className="text-4xl font-black uppercase tracking-[-0.05em] leading-none md:text-5xl">
                 {observed.summary.tier1Verdict ?? 'DIAGNOSTIC'}
               </h2>
             </div>
-            <p className="text-sm font-bold text-slate-400 leading-relaxed italic">
+            <p className="text-sm font-bold text-slate-300 leading-relaxed italic">
               {observed.summary.verdictMeaning ?? ''}
             </p>
-            <div className={`rounded-[2rem] border p-6 space-y-4 ${isLowMaturity ? 'border-white/10 bg-white/5' : 'border-slate-200 bg-slate-50'}`}>
+            <div className="space-y-4 rounded-[2rem] border border-white/10 bg-white/5 p-6 backdrop-blur-sm">
               <div className="space-y-2">
-                <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isLowMaturity ? 'text-indigo-300' : 'text-indigo-600'}`}>
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-200">
                   What This Means For You
                 </p>
-                <p className={`text-sm leading-relaxed ${isLowMaturity ? 'text-slate-200' : 'text-slate-700'}`}>
+                <p className="text-sm leading-relaxed text-slate-200">
                   {outcomeSummary}
                 </p>
               </div>
-              <div className={`rounded-2xl p-4 ${isLowMaturity ? 'bg-slate-950/40 border border-white/10' : 'bg-white border border-slate-200'}`}>
-                <p className={`text-[10px] font-black uppercase tracking-[0.3em] ${isLowMaturity ? 'text-slate-400' : 'text-slate-500'}`}>
+              <div className="rounded-[1.5rem] border border-white/10 bg-slate-950/40 p-4">
+                <p className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400">
                   Biggest Missed Opportunity
                 </p>
-                <p className={`mt-2 text-sm font-semibold leading-relaxed ${isLowMaturity ? 'text-white' : 'text-slate-900'}`}>
+                <p className="mt-2 text-sm font-semibold leading-relaxed text-white">
                   {primaryOutcome}
                 </p>
               </div>
             </div>
           </div>
 
-          <div className="flex flex-col items-center justify-center bg-slate-800/20 p-8 rounded-[2.5rem] border border-white/5">
-             <span className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-4">CitationIQ Visibility Score</span>
+          <div className="grid gap-4">
+            <div className="flex flex-col items-center justify-center rounded-[2.5rem] border border-white/10 bg-white/5 p-8 text-center backdrop-blur-sm">
+             <span className="mb-4 text-[10px] font-black uppercase tracking-[0.4em] text-indigo-300">CitationIQ Visibility Score</span>
              <div className="flex items-baseline space-x-2">
                 <span className="text-8xl font-black tracking-tighter text-white drop-shadow-lg">{readiness?.internal_ai_readiness_score ?? overallScore}</span>
                 <span className="text-2xl font-black text-slate-500">/100</span>
@@ -183,23 +189,37 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
              <span className="mt-2 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
                {getPercentileLabel(overallScore)}
              </span>
+            </div>
+            <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
+              <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Commercial upside</p>
+                <p className="mt-2 text-lg font-black text-white">{impactLevel}</p>
+                <p className="mt-2 text-sm text-slate-300">{commercialImpact}</p>
+              </div>
+              <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Likely payoff window</p>
+                <p className="mt-2 text-lg font-black text-white">{payoffWindow}</p>
+                <p className="mt-2 text-sm text-slate-300">Validate progress with before/after checks and AI outcome tests.</p>
+              </div>
+              <div className="rounded-[1.75rem] border border-white/10 bg-white/5 p-5">
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Highest-value focus</p>
+                <p className="mt-2 text-lg font-black text-white">Fix the weakest signal first</p>
+                <p className="mt-2 text-sm text-slate-300">{roiFocus}</p>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
+      </SurfaceCard>
 
-      <section className="bg-white border border-slate-200 rounded-[2.5rem] p-8 space-y-5">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Top Quick Wins</p>
-            <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">What to do first</h3>
-          </div>
-          <p className="text-sm text-slate-500 max-w-2xl">
-            Focus on the changes most likely to improve how AI systems understand, trust, and cite your brand.
-          </p>
-        </div>
+      <SurfaceCard className="p-8 space-y-5">
+        <SectionIntro
+          label="Top Quick Wins"
+          title="What to do first"
+          description="Focus on the changes most likely to improve how AI systems understand, trust, and cite your brand."
+        />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {prioritizedQuickWins.map((item, index) => (
-            <div key={`${item}-${index}`} className="rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-3">
+            <div key={`${item}-${index}`} className="rounded-[1.75rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#f8fafc_100%)] p-5 space-y-3 shadow-sm">
               <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-indigo-600 text-white text-xs font-black">
                 {index + 1}
               </span>
@@ -210,36 +230,7 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
             </div>
           ))}
         </div>
-      </section>
-
-      <section className="bg-white border border-slate-200 rounded-[2.5rem] p-8 space-y-5">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Business Impact Snapshot</p>
-            <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">What this could mean commercially</h3>
-          </div>
-          <p className="text-sm text-slate-500 max-w-2xl">
-            CitationIQ translates the visibility gap into what matters most: how much brand discovery, trust, and competitive share you may be missing.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Commercial upside</p>
-            <p className="text-lg font-black text-slate-900">{impactLevel}</p>
-            <p className="text-sm text-slate-600">{commercialImpact}</p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Likely payoff window</p>
-            <p className="text-lg font-black text-slate-900">{payoffWindow}</p>
-            <p className="text-sm text-slate-600">Use the before/after check and AI outcome tests to confirm progress as changes go live.</p>
-          </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5 space-y-2">
-            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Highest-value focus</p>
-            <p className="text-lg font-black text-slate-900">Prioritize the weakest signal</p>
-            <p className="text-sm text-slate-600">{roiFocus}</p>
-          </div>
-        </div>
-      </section>
+      </SurfaceCard>
 
       {/* Numerical Breakdown */}
       {readiness?.breakdown && (
@@ -262,29 +253,40 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
         />
       ) : (
         <section className="space-y-2 pt-12 border-t border-slate-200">
-          <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">AI Outcome Validation</h3>
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            Run AI Outcome Test from the Query Pack below to measure recommendation outcomes.
-          </p>
+          <SectionIntro
+            label="AI Outcome Validation"
+            title="Measure whether recommendations improved"
+            description="Run the AI outcome test from the Query Pack below to confirm better mentions, citations, and recommendation outcomes."
+          />
         </section>
       )}
 
       {/* Market Synthesis / Key Selection Logic */}
       {!deepSynthesis && !isSynthesizing && onUnlockSearch && (
-        <section className="bg-slate-900 p-10 rounded-[3rem] border border-slate-800 text-center space-y-6">
-           <h3 className="text-xl font-black text-white uppercase tracking-tighter">Unlock Competitor Insights</h3>
-           <p className="text-slate-400 text-xs max-w-lg mx-auto leading-relaxed">Advanced competitor comparisons and market-gap analysis require Search Grounding via a paid API key.</p>
+        <SurfaceCard tone="dark" className="p-10 text-center space-y-6">
+           <SectionIntro
+             label="Competitor Intelligence"
+             title="Unlock competitor insights"
+             description="Advanced competitor comparisons and market-gap analysis require Search Grounding via a paid API key."
+             align="center"
+             invert
+             className="max-w-lg"
+           />
            <button onClick={onUnlockSearch} className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-indigo-500/20">
              Unlock Advanced Insights
            </button>
-        </section>
+        </SurfaceCard>
       )}
 
       {deepSynthesis && (
         <section className="space-y-8 pt-12 border-t border-slate-200">
-           <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Market Synthesis</h3>
+           <SectionIntro
+             label="Market Synthesis"
+             title="See the wider competitive landscape"
+             description="Use these insights to understand who currently owns authority and where open visibility opportunities remain."
+           />
            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className="bg-slate-900 p-10 rounded-[2.5rem] text-white">
+              <SurfaceCard tone="dark" className="p-10">
                  <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest mb-8">Category Authority Holders</h4>
                  <div className="p-6 bg-slate-800 rounded-2xl mb-8">
                     <span className="text-[8px] font-black text-indigo-400 uppercase block mb-1">Identified Market Leader</span>
@@ -297,8 +299,8 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
                       </li>
                     ))}
                  </ul>
-              </div>
-              <div className="bg-white border border-slate-200 p-10 rounded-[2.5rem]">
+              </SurfaceCard>
+              <SurfaceCard className="p-10">
                  <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-8">Open Visibility Opportunities</h4>
                  <div className="flex flex-wrap gap-2">
                     {deepSynthesis.entityMapping?.unclaimed_semantic_territory?.map((t, i) => (
@@ -307,51 +309,48 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
                       </span>
                     ))}
                  </div>
-              </div>
+              </SurfaceCard>
            </div>
         </section>
       )}
 
       {children}
 
-      <section className="bg-white border border-slate-200 rounded-[2.5rem] p-8 space-y-4">
-        <div className="flex flex-col gap-2 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">Proof It Worked</p>
-            <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">Verify the before/after result</h3>
-          </div>
-          <p className="text-sm text-slate-500 max-w-2xl">
-            After your changes go live, use CitationIQ to confirm score gains, reduced blockers, and stronger recommendation outcomes.
-          </p>
-        </div>
+      <SurfaceCard className="p-8 space-y-4">
+        <SectionIntro
+          label="Proof It Worked"
+          title="Verify the before/after result"
+          description="After your changes go live, use CitationIQ to confirm score gains, reduced blockers, and stronger recommendation outcomes."
+        />
         <div className="grid gap-4 md:grid-cols-3">
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">1. Launch the fixes</p>
             <p className="mt-2 text-sm text-slate-700">
               Publish the highest-priority content, citation, and structured-data updates first.
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">2. Run the before/after check</p>
             <p className="mt-2 text-sm text-slate-700">
               Re-audit to compare the new visibility score, diagnosis, and weak-signal profile against your baseline.
             </p>
           </div>
-          <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+          <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5">
             <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">3. Validate outcomes</p>
             <p className="mt-2 text-sm text-slate-700">
               Run AI outcome tests from the query pack to confirm better mentions, citations, and recommendation quality.
             </p>
           </div>
         </div>
-      </section>
+      </SurfaceCard>
 
+      <SurfaceCard className="p-6">
       <div className="flex flex-wrap gap-4 justify-between items-center">
         <div className="flex flex-wrap gap-3">
           {onDownloadReport && (
             <button
               onClick={onDownloadReport}
-              className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+              className="px-8 py-4 bg-[linear-gradient(135deg,#4f46e5_0%,#6366f1_55%,#7c83ff_100%)] hover:brightness-105 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_16px_34px_rgba(79,70,229,0.22)]"
             >
               Download Report (PDF)
             </button>
@@ -368,7 +367,7 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
             <button
               onClick={onReAudit}
               disabled={isReAuditing}
-              className="px-8 py-4 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2"
+              className="px-8 py-4 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-sm"
             >
               {isReAuditing ? (
                 <>
@@ -383,7 +382,7 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
           {onViewRoadmap && (
             <button
               onClick={onViewRoadmap}
-              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
             >
               View Roadmap
             </button>
@@ -391,7 +390,7 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
           {!onViewRoadmap && auditId && (
             <Link
               to={`/roadmap/${auditId}`}
-              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
             >
               View Roadmap
             </Link>
@@ -401,6 +400,7 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
           Start New Audit
         </button>
       </div>
+      </SurfaceCard>
     </div>
   );
 };

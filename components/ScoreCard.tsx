@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { SurfaceCard } from './VisualSystem';
 
 interface ScoreCardProps {
   label: string;
@@ -11,7 +12,7 @@ interface ScoreCardProps {
 
 const ScoreCard: React.FC<ScoreCardProps> = ({ label, score, labelValue, colorClass, description }) => {
   return (
-    <div className="bg-white p-8 rounded-[2.5rem] border border-slate-200 shadow-sm flex flex-col items-center text-center relative overflow-hidden group hover:border-indigo-500/30 transition-all">
+    <SurfaceCard className="group relative overflow-hidden p-8 text-center transition-all hover:-translate-y-0.5 hover:border-indigo-200">
       <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4">{label}</span>
       
       {labelValue ? (
@@ -29,10 +30,10 @@ const ScoreCard: React.FC<ScoreCardProps> = ({ label, score, labelValue, colorCl
 
       <p className="mt-4 text-[10px] text-slate-500 leading-tight uppercase font-medium tracking-tight opacity-75">{description}</p>
       
-      <div className="absolute bottom-0 left-0 w-full h-0.5 bg-slate-50 overflow-hidden">
-        <div className="h-full bg-indigo-500/20 w-1/3 animate-progress"></div>
+      <div className="absolute inset-x-8 bottom-0 h-px overflow-hidden bg-slate-100">
+        <div className="h-full w-1/3 bg-indigo-500/30 animate-progress"></div>
       </div>
-    </div>
+    </SurfaceCard>
   );
 };
 

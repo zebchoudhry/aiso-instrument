@@ -1,5 +1,6 @@
 import React from 'react';
 import type { FixLibraryResponse, TreatmentPlan } from '../types';
+import { SurfaceCard } from './VisualSystem';
 
 interface TopActionsSummaryProps {
   fixLibrary: FixLibraryResponse | null;
@@ -31,7 +32,7 @@ export default function TopActionsSummary({ fixLibrary, treatmentPlan }: TopActi
   if (actions.length === 0) return null;
 
   return (
-    <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-6">
+    <SurfaceCard tone="soft" className="p-6">
       <h3 className="text-sm font-black uppercase tracking-tight text-indigo-900 mb-4">Your top actions</h3>
       <ol className="space-y-4">
         {actions.slice(0, 5).map((a, i) => (
@@ -46,6 +47,6 @@ export default function TopActionsSummary({ fixLibrary, treatmentPlan }: TopActi
           </li>
         ))}
       </ol>
-    </div>
+    </SurfaceCard>
   );
 }

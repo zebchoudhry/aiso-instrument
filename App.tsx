@@ -26,6 +26,7 @@ import WhatWeMeasuredDisplay from './components/WhatWeMeasuredDisplay';
 import WhyThisMattersDisplay from './components/WhyThisMattersDisplay';
 import WhatWillChangeDisplay from './components/WhatWillChangeDisplay';
 import ProofItWorkedDisplay from './components/ProofItWorkedDisplay';
+import CitationIQLogo from './components/CitationIQLogo';
 
 import type { AIAnswerTestResponse } from './types';
 import {
@@ -476,10 +477,10 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
-      <nav className="border-b border-slate-200 bg-white/80 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
-          <Link to="/" className="text-[10px] font-black uppercase tracking-widest text-slate-900">
-            CitationIQ
+      <nav className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/85 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <Link to="/" className="flex items-center">
+            <CitationIQLogo size="sm" />
           </Link>
           <div className="flex gap-6">
             <Link to="/methodology" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600">
@@ -497,25 +498,12 @@ const App: React.FC = () => {
           </div>
         </div>
       </nav>
-      <main className="max-w-7xl mx-auto p-6">
+      <main className="mx-auto max-w-7xl p-6 md:p-8">
         {!observedAudit ? (
           <>
-            <section className="mb-6 bg-white border border-slate-200 rounded-[2.5rem] p-6">
-              <div className="max-w-3xl space-y-3">
-                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">
-                  CitationIQ
-                </p>
-                <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-slate-900">
-                  Find what is stopping AI from recommending your brand
-                </h1>
-                <p className="text-sm text-slate-600">
-                  CitationIQ shows why AI systems overlook you, where competitors have the edge, and which fixes are most likely to improve visibility fastest.
-                </p>
-              </div>
-            </section>
             <LandingHero />
             {errorMessage && (
-              <div className="mb-6 bg-red-50 border-2 border-red-200 p-5 rounded-xl text-sm text-red-800">
+              <div className="mx-auto mb-8 max-w-5xl rounded-2xl border-2 border-red-200 bg-red-50 p-5 text-sm text-red-800">
                 <p className="font-bold">{errorMessage}</p>
                 {usePasteFallback && (
                   <div className="mt-4 p-4 bg-white rounded-lg border border-red-100">
@@ -530,19 +518,70 @@ const App: React.FC = () => {
                 )}
               </div>
             )}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <div className="lg:col-span-2">
-                <AuditForm
-                  onAudit={handleAudit}
-                  onAuditFromHtml={handleAuditFromHtml}
-                  isLoading={isLoading}
-                  showPasteFallback={usePasteFallback}
-                />
+            <section className="mx-auto mt-8 max-w-6xl space-y-8">
+              <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1.55fr)_minmax(320px,0.85fr)]">
+                <div className="rounded-[2.5rem] border border-slate-200 bg-white p-6 shadow-[0_20px_60px_rgba(15,23,42,0.08)] md:p-8">
+                  <div className="grid gap-4 border-b border-slate-100 pb-6 md:grid-cols-3">
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">You will get</p>
+                      <p className="mt-2 text-sm font-semibold text-slate-900">A plain-language verdict</p>
+                      <p className="mt-1 text-xs text-slate-600">Understand where AI sees your brand clearly and where it does not.</p>
+                    </div>
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">You will get</p>
+                      <p className="mt-2 text-sm font-semibold text-slate-900">A prioritized action plan</p>
+                      <p className="mt-1 text-xs text-slate-600">Focus on the fixes most likely to improve visibility first.</p>
+                    </div>
+                    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                      <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">You will get</p>
+                      <p className="mt-2 text-sm font-semibold text-slate-900">Proof and comparison</p>
+                      <p className="mt-1 text-xs text-slate-600">Re-audit, compare competitors, and validate whether the fixes worked.</p>
+                    </div>
+                  </div>
+                  <div className="pt-8">
+                    <AuditForm
+                      onAudit={handleAudit}
+                      onAuditFromHtml={handleAuditFromHtml}
+                      isLoading={isLoading}
+                      showPasteFallback={usePasteFallback}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#eef2ff_100%)] p-6 shadow-sm">
+                    <p className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600">
+                      Why teams use CitationIQ
+                    </p>
+                    <h3 className="mt-3 text-xl font-black uppercase tracking-tight text-slate-900">
+                      Move from diagnosis to action faster
+                    </h3>
+                    <p className="mt-3 text-sm leading-6 text-slate-600">
+                      Run a visibility audit, identify where competitors look stronger, and generate a roadmap your team can actually follow.
+                    </p>
+                  </div>
+                  <AuditHistory />
+                </div>
               </div>
-              <div>
-                <AuditHistory />
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+                <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Step 1</p>
+                  <p className="mt-2 text-base font-black uppercase tracking-tight text-slate-900">Run the audit</p>
+                  <p className="mt-2 text-sm text-slate-600">Surface the trust, structure, and citation signals AI systems use to evaluate your brand.</p>
+                </div>
+                <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Step 2</p>
+                  <p className="mt-2 text-base font-black uppercase tracking-tight text-slate-900">Fix the biggest gaps</p>
+                  <p className="mt-2 text-sm text-slate-600">Use prioritized quick wins and implementation assets to improve what AI can trust and cite.</p>
+                </div>
+                <div className="rounded-[2rem] border border-slate-200 bg-white p-5 shadow-sm">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Step 3</p>
+                  <p className="mt-2 text-base font-black uppercase tracking-tight text-slate-900">Prove the outcome</p>
+                  <p className="mt-2 text-sm text-slate-600">Compare before and after scores, test your queries, and track whether competitors still have the edge.</p>
+                </div>
               </div>
-            </div>
+            </section>
           </>
         ) : (
           <ResultDashboard

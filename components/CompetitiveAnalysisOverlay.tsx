@@ -1,4 +1,6 @@
 import React from 'react';
+import CitationIQLogo from './CitationIQLogo';
+import { SectionIntro, SurfaceCard } from './VisualSystem';
 
 export interface CompetitiveGap {
   category: string;
@@ -53,11 +55,18 @@ const CompetitiveAnalysisOverlay: React.FC<CompetitiveAnalysisOverlayProps> = ({
   return (
     <div className="fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/80 backdrop-blur-xl p-6 animate-in fade-in duration-300">
       <div className="bg-slate-50 w-full max-w-4xl max-h-[90vh] rounded-[3rem] shadow-2xl overflow-hidden flex flex-col border border-slate-200 animate-in zoom-in-95 duration-500">
-        <div className="p-10 bg-slate-900 text-white border-b-4 border-indigo-500">
+        <div className="p-10 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.22),transparent_32%),linear-gradient(180deg,#08112e_0%,#0b1537_60%,#0f172a_100%)] text-white border-b border-white/10">
           <div className="flex justify-between items-center">
             <div>
-              <div className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-2">Competitive Intelligence</div>
-              <h3 className="text-3xl font-black uppercase tracking-tight">Side-by-Side Analysis</h3>
+              <CitationIQLogo theme="light" size="sm" />
+              <div className="mt-6">
+                <SectionIntro
+                  label="Competitive Intelligence"
+                  title="Side-by-side analysis"
+                  description="Compare your visibility signals against a chosen competitor and focus on the highest-value gaps."
+                  invert
+                />
+              </div>
             </div>
             <button onClick={onClose} className="text-slate-500 hover:text-white transition-colors">
               <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -74,23 +83,23 @@ const CompetitiveAnalysisOverlay: React.FC<CompetitiveAnalysisOverlayProps> = ({
           ) : analysis ? (
             <>
               <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
+                <SurfaceCard className="p-8">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Your Score</h4>
                   <div className="text-4xl font-mono font-black text-slate-900">{analysis.overallScoreYou}/100</div>
                   <p className="text-xs text-slate-500 mt-2 truncate">{analysis.yourDomain}</p>
-                </div>
-                <div className="bg-white p-8 rounded-[2rem] border border-slate-200 shadow-sm">
+                </SurfaceCard>
+                <SurfaceCard className="p-8">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Competitor Score</h4>
                   <div className="text-4xl font-mono font-black text-slate-900">{analysis.overallScoreCompetitor}/100</div>
                   <p className="text-xs text-slate-500 mt-2 truncate">{analysis.competitorDomain}</p>
-                </div>
+                </SurfaceCard>
               </section>
 
               <section className="space-y-6">
                 <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em]">Critical Gaps</h4>
                 <div className="space-y-4">
                   {analysis.gaps.map((gap, i) => (
-                    <div key={i} className="p-6 bg-white border border-slate-200 rounded-2xl">
+                    <div key={i} className="rounded-[1.75rem] border border-slate-200 bg-white p-6 shadow-sm">
                       <div className="flex justify-between items-start mb-2">
                         <span className="text-sm font-black text-slate-900">{gap.category}</span>
                         <span className={`text-[10px] font-black uppercase px-2 py-1 rounded ${
@@ -107,19 +116,19 @@ const CompetitiveAnalysisOverlay: React.FC<CompetitiveAnalysisOverlayProps> = ({
               </section>
 
               <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="bg-white p-8 rounded-[2rem] border border-slate-200">
+                <SurfaceCard className="p-8">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Schema Comparison</h4>
                   <p className="text-xs text-slate-600 mb-2">You have: {analysis.schemaComparison.yourSchemas.join(', ') || 'None'}</p>
                   <p className="text-xs text-slate-600 mb-2">They have: {analysis.schemaComparison.theirSchemas.join(', ') || 'None'}</p>
                   {analysis.schemaComparison.youMissing.length > 0 && (
                     <p className="text-xs font-bold text-rose-600 mt-4">You're missing: {analysis.schemaComparison.youMissing.join(', ')}</p>
                   )}
-                </div>
-                <div className="bg-white p-8 rounded-[2rem] border border-slate-200">
+                </SurfaceCard>
+                <SurfaceCard className="p-8">
                   <h4 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Content Comparison</h4>
                   <p className="text-xs text-slate-600">Word count: You {analysis.contentComparison.yourWordCount} vs Them {analysis.contentComparison.theirWordCount}</p>
                   <p className="text-xs text-slate-600 mt-1">Propositional density: You {analysis.contentComparison.yourPropositionalDensity}% vs Them {analysis.contentComparison.theirPropositionalDensity}%</p>
-                </div>
+                </SurfaceCard>
               </section>
             </>
           ) : null}
