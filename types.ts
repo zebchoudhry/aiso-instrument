@@ -329,12 +329,27 @@ export interface RoadmapResponse {
   scoreProjection: RoadmapScoreProjection;
 }
 
+export interface DiagnosisResult {
+  summary: string;
+  causes: string[];
+  items: Array<{
+    key: 'entity' | 'citation' | 'compressibility' | 'trust';
+    title: string;
+    cause: string;
+    customerImpact: string;
+    nextAction: string;
+    expectedBenefit: string;
+    priority: 'Now' | 'Next' | 'Later';
+  }>;
+}
+
 export interface RoadmapPayload {
   overallScore: number;
   signalCoverageScore: number;
   citationHealthScore: number;
   contentDepthScore: number;
   authoritySignalsScore: number;
+  diagnosis: DiagnosisResult;
   identifiedWeakSignals: string[];
   topOpportunities: string[];
   extractionSummary: {

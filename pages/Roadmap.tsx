@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useParams } from 'react-router-dom';
-import type { RoadmapResponse, RoadmapAction, RoadmapPayload, AuditResponse, ExtractionData, FixLibraryResponse } from '../types';
+import type { DiagnosisResult, RoadmapResponse, RoadmapAction, RoadmapPayload, AuditResponse, ExtractionData, FixLibraryResponse } from '../types';
 import { buildRoadmapPayload } from '../lib/roadmapPayload';
 import { SchemaGenerator } from '../services/schemaGenerator';
+import InvisibilityDiagnosisPanel from '../components/InvisibilityDiagnosisPanel';
 
 interface LocationState {
   auditResult?: AuditResponse;
@@ -40,6 +41,64 @@ const CONFIDENCE_COLORS = {
   Medium: 'text-indigo-600',
   High: 'text-emerald-600',
 };
+
+function inferOwner(action: RoadmapAction): 'Founder' | 'Marketer' | 'Developer' | 'SEO' {
+  const haystack = `${action.title} ${action.why} ${action.expectedImpact}`.toLowerCase();
+
+  if (haystack.includes('schema') || haystack.includes('technical') || haystack.includes('markup') || haystack.includes('canonical')) {
+    return 'Developer';
+  }
+  if (haystack.includes('content') || haystack.includes('faq') || haystack.includes('page') || haystack.includes('copy')) {
+    return 'Marketer';
+  }
+  if (haystack.includes('citation') || haystack.includes('search') || haystack.includes('query') || haystack.includes('visibility')) {
+    return 'SEO';
+  }
+
+  return 'Founder';
+}
+
+function estimateTime(difficulty: RoadmapAction['difficulty']): string {
+  switch (difficulty) {
+    case 'Low':
+      return '30-90 minutes';
+    case 'Medium':
+      return 'Half day';
+    case 'High':
+      return '1-3 days';
+    default:
+      return 'Half day';
+  }
+}
+
+function inferProofOfDone(action: RoadmapAction): string {
+  const haystack = `${action.title} ${action.why} ${action.expectedImpact}`.toLowerCase();
+
+  if (haystack.includes('schema')) {
+    return 'Structured data is live on the page and visible in the rendered source.';
+  }
+  if (haystack.includes('citation') || haystack.includes('sameas') || haystack.includes('authority')) {
+    return 'The page now includes verifiable corroboration links and brand proof signals.';
+  }
+  if (haystack.includes('content') || haystack.includes('faq') || haystack.includes('answer')) {
+    return 'The page includes clearer answer blocks, lists, FAQs, or reusable factual sections.';
+  }
+
+  return 'The change is live on the target page and can be confirmed in a re-audit.';
+}
+
+function getVerificationStep(phaseKey: string): string {
+  switch (phaseKey) {
+    case 'phase1':
+      return 'Re-run the audit after launch and confirm entity and trust scores improve first.';
+    case 'phase2':
+      return 'Check whether citation and corroboration signals improved in the next audit.';
+    case 'phase3':
+      return 'Run AI outcome tests to confirm your brand appears in more answers and recommendations.';
+    default:
+      return 'Re-run the audit and compare before/after results.';
+  }
+}
 
 interface RoadmapValidation {
   validationScore: number;
@@ -133,6 +192,10 @@ function ActionCard({
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<{ type: 'schema' | 'factual'; content: string; title?: string } | null>(null);
   const [copied, setCopied] = useState(false);
+  const owner = inferOwner(action);
+  const timeEstimate = estimateTime(action.difficulty);
+  const proofOfDone = inferProofOfDone(action);
+  const verificationStep = getVerificationStep(phaseKey);
 
   const handleOpenModal = () => {
     setModalOpen(true);
@@ -256,6 +319,32 @@ function ActionCard({
           <div>
             <span className="font-bold uppercase tracking-wider text-slate-400 block mb-1">Expected Impact</span>
             <p>{action.expectedImpact}</p>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-3 text-xs pl-8">
+          <div className="rounded-xl border border-slate-200 bg-white p-3">
+            <span className="font-bold uppercase tracking-wider text-slate-400 block mb-1">Owner</span>
+            <p className="text-slate-900 font-semibold">{owner}</p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-3">
+            <span className="font-bold uppercase tracking-wider text-slate-400 block mb-1">Estimated Time</span>
+            <p className="text-slate-900 font-semibold">{timeEstimate}</p>
+          </div>
+          <div className="rounded-xl border border-slate-200 bg-white p-3">
+            <span className="font-bold uppercase tracking-wider text-slate-400 block mb-1">Verify With</span>
+            <p className="text-slate-900 font-semibold">{phaseKey === 'phase3' ? 'AI outcome test' : 'Re-audit'}</p>
+          </div>
+        </div>
+
+        <div className="grid md:grid-cols-2 gap-3 text-xs text-slate-600 pl-8">
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+            <span className="font-bold uppercase tracking-wider text-emerald-700 block mb-1">Proof Of Done</span>
+            <p className="text-slate-700">{proofOfDone}</p>
+          </div>
+          <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3">
+            <span className="font-bold uppercase tracking-wider text-indigo-700 block mb-1">Next Verification Step</span>
+            <p className="text-slate-700">{verificationStep}</p>
           </div>
         </div>
 
@@ -389,6 +478,34 @@ function ScoreProjection({ current, projected90Day, confidence }: { current: num
   );
 }
 
+function VerificationPlan() {
+  return (
+    <div className="bg-white border border-slate-200 rounded-xl p-4 space-y-4">
+      <div>
+        <h3 className="text-base font-black uppercase tracking-tight text-slate-900">Before/After Verification Plan</h3>
+        <p className="text-xs text-slate-500 mt-1">
+          Use this sequence to prove the roadmap created measurable visibility improvement.
+        </p>
+      </div>
+      <div className="grid gap-3 md:grid-cols-4">
+        {[
+          'Implement the highest-priority actions first.',
+          'Run a fresh audit after the updates go live.',
+          'Compare the new score and diagnosis against today\'s baseline.',
+          'Run AI outcome tests to confirm more brand mentions and citations.',
+        ].map((step, index) => (
+          <div key={step} className="rounded-xl border border-slate-200 bg-slate-50 p-4 space-y-2">
+            <span className="inline-flex items-center justify-center w-7 h-7 rounded-full bg-slate-900 text-white text-[10px] font-black">
+              {index + 1}
+            </span>
+            <p className="text-sm text-slate-700">{step}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function ValidationScore({ validation }: { validation: RoadmapValidation }) {
   const isWarning = validation.validationScore < 70;
 
@@ -449,6 +566,7 @@ export default function Roadmap() {
   const [domain, setDomain] = useState('');
   const [auditName, setAuditName] = useState('');
   const [assetContext, setAssetContext] = useState<RoadmapAssetContext | null>(null);
+  const [payload, setPayload] = useState<RoadmapPayload | null>(null);
 
   useEffect(() => {
     async function run() {
@@ -456,6 +574,7 @@ export default function Roadmap() {
       setError(null);
       setValidation(null);
       setAssetContext(null);
+      setPayload(null);
 
       let auditResult: AuditResponse | null = state.auditResult ?? null;
       let extractionData: ExtractionData | null = state.extractionData ?? null;
@@ -510,6 +629,7 @@ export default function Roadmap() {
       });
 
       const payload: RoadmapPayload = buildRoadmapPayload(auditResult, extractionData, queryPackQueries, url, fixLibrary);
+      setPayload(payload);
 
       try {
         const url = '/api/roadmap';
@@ -576,7 +696,7 @@ export default function Roadmap() {
 
         <div>
           <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tight text-slate-900">
-            90-Day AI Visibility Roadmap
+            90-Day Visibility Growth Plan
           </h1>
           {auditName && (
             <p className="text-sm text-slate-500 mt-1">{auditName}</p>
@@ -586,7 +706,7 @@ export default function Roadmap() {
         {isLoading && (
           <div className="bg-white border border-slate-200 rounded-[2rem] p-16 flex flex-col items-center gap-4">
             <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Generating Roadmap…</p>
+            <p className="text-sm font-bold text-slate-500 uppercase tracking-widest">Building Your Plan…</p>
             <p className="text-xs text-slate-400">This takes 10–20 seconds</p>
           </div>
         )}
@@ -604,7 +724,7 @@ export default function Roadmap() {
         {!isLoading && !error && !roadmap && !auditId && !state.auditResult && (
           <div className="bg-white border border-slate-200 rounded-[2rem] p-12 text-center space-y-4">
             <h2 className="text-xl font-black uppercase tracking-tight text-slate-900">No Audit Data</h2>
-            <p className="text-sm text-slate-500">Run an audit first, then click "View Roadmap" to generate your execution plan.</p>
+            <p className="text-sm text-slate-500">Run an audit first, then click "View Roadmap" to build your action plan.</p>
             <Link to="/" className="inline-block mt-2 bg-indigo-600 text-white text-xs font-black uppercase tracking-widest px-6 py-3 rounded-xl hover:bg-indigo-700 transition-colors">
               Run Audit
             </Link>
@@ -620,9 +740,12 @@ export default function Roadmap() {
                 projected90Day={roadmap.scoreProjection.projected90Day ?? 0}
                 confidence={(roadmap.scoreProjection.confidence as 'Low' | 'Medium' | 'High') ?? 'Medium'}
               />
+              <VerificationPlan />
               {validation && <ValidationScore validation={validation} />}
               </>
             )}
+
+            {payload?.diagnosis && <InvisibilityDiagnosisPanel diagnosis={payload.diagnosis} />}
 
             {PHASE_LABELS.map(({ key, label, subtitle, title }) => {
               const phase = roadmap[key as 'phase1' | 'phase2' | 'phase3'];
@@ -645,7 +768,7 @@ export default function Roadmap() {
             })}
 
             <p className="text-[10px] text-slate-400 text-center pt-4">
-              Generated by AI Visibility Engine · {new Date().toLocaleDateString()}
+              Generated by CitationIQ · {new Date().toLocaleDateString()}
             </p>
           </div>
         )}

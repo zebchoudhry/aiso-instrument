@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AuditForm from './components/AuditForm';
 import AuditHistory from './components/AuditHistory';
@@ -56,6 +56,7 @@ import { TreatmentGenerator } from './services/treatmentService';
 import { BaselineStore } from './services/storageService';
 import { SchemaGenerator } from './services/schemaGenerator';
 import { ReportService } from './services/reportService';
+import { buildRoadmapPayload } from './lib/roadmapPayload';
 
 function getDomain(url: string): string {
   try {
@@ -116,6 +117,18 @@ const App: React.FC = () => {
   const [queryPackVerifications, setQueryPackVerifications] = useState<Array<{ query: string; result: string | null; pastedResponse?: string }>>([]);
   const [aiOutcomeResults, setAiOutcomeResults] = useState<AIAnswerTestResponse | null>(null);
   const [aiOutcomeLoading, setAiOutcomeLoading] = useState(false);
+
+  const auditDiagnosis = useMemo(() => {
+    if (!observedAudit || !lastExtractionData) return null;
+
+    return buildRoadmapPayload(
+      observedAudit,
+      lastExtractionData,
+      queryPack?.queries ?? [],
+      observedAudit.summary.url ?? '',
+      fixLibrary ?? null
+    ).diagnosis;
+  }, [observedAudit, lastExtractionData, queryPack, fixLibrary]);
 
   useEffect(() => {
     fetch('/api/config')
@@ -466,7 +479,7 @@ const App: React.FC = () => {
       <nav className="border-b border-slate-200 bg-white/80 backdrop-blur">
         <div className="max-w-7xl mx-auto px-6 py-3 flex justify-between items-center">
           <Link to="/" className="text-[10px] font-black uppercase tracking-widest text-slate-900">
-            AISO Instrument
+            CitationIQ
           </Link>
           <div className="flex gap-6">
             <Link to="/methodology" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600">
@@ -487,6 +500,19 @@ const App: React.FC = () => {
       <main className="max-w-7xl mx-auto p-6">
         {!observedAudit ? (
           <>
+            <section className="mb-6 bg-white border border-slate-200 rounded-[2.5rem] p-6">
+              <div className="max-w-3xl space-y-3">
+                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">
+                  CitationIQ
+                </p>
+                <h1 className="text-3xl md:text-4xl font-black uppercase tracking-tighter text-slate-900">
+                  Find what is stopping AI from recommending your brand
+                </h1>
+                <p className="text-sm text-slate-600">
+                  CitationIQ shows why AI systems overlook you, where competitors have the edge, and which fixes are most likely to improve visibility fastest.
+                </p>
+              </div>
+            </section>
             <LandingHero />
             {errorMessage && (
               <div className="mb-6 bg-red-50 border-2 border-red-200 p-5 rounded-xl text-sm text-red-800">
@@ -582,7 +608,7 @@ const App: React.FC = () => {
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
               a.href = url;
-              a.download = `aiso-report-${(observedAudit.summary?.subjectName ?? 'audit').replace(/\s+/g, '-')}-${Date.now()}.pdf`;
+              a.download = `citationiq-report-${(observedAudit.summary?.subjectName ?? 'audit').replace(/\s+/g, '-')}-${Date.now()}.pdf`;
               a.click();
               URL.revokeObjectURL(url);
             }}
@@ -593,6 +619,7 @@ const App: React.FC = () => {
             isBriefLoading={isBriefLoading}
             aiOutcomeResults={aiOutcomeResults}
             aiOutcomeLoading={aiOutcomeLoading}
+            diagnosis={auditDiagnosis}
           >
             {errorMessage && (
               <div className="bg-red-50 border border-red-200 p-4 rounded-xl text-sm text-red-700">
@@ -600,19 +627,59 @@ const App: React.FC = () => {
               </div>
             )}
 
-            <PlainLanguageVerdict audit={observedAudit} />
-            <div className="space-y-4">
-              <WhatWeMeasuredDisplay extractionData={lastExtractionData} audit={observedAudit} />
-              <WhyThisMattersDisplay audit={observedAudit} />
-              <TopActionsSummary fixLibrary={fixLibrary} treatmentPlan={treatmentPlan} />
-              <WhatWillChangeDisplay audit={observedAudit} hasActions={!!(fixLibrary?.fixes?.length || treatmentPlan?.prescriptions?.length)} />
-              <ProofItWorkedDisplay />
-            </div>
-            <SignalCoverageDisplay extractionData={lastExtractionData} />
-            <BridgeNarrativeDisplay extractionData={lastExtractionData} audit={observedAudit} />
-            <CitationHealthDisplay extractionData={lastExtractionData} />
-            <WhatLLMsSeeDisplay extractionData={lastExtractionData} />
-            <HeresWhyDisplay extractionData={lastExtractionData} audit={observedAudit} />
+            <section className="space-y-4">
+              <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 space-y-2">
+                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">
+                  Start Here
+                </p>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">
+                  Your fastest path to better AI visibility
+                </h3>
+                <p className="text-sm text-slate-600 max-w-3xl">
+                  Review what CitationIQ found, why it matters commercially, and which actions to prioritize first.
+                </p>
+              </div>
+              <PlainLanguageVerdict audit={observedAudit} />
+              <div className="space-y-4">
+                <WhatWeMeasuredDisplay extractionData={lastExtractionData} audit={observedAudit} />
+                <WhyThisMattersDisplay audit={observedAudit} />
+                <TopActionsSummary fixLibrary={fixLibrary} treatmentPlan={treatmentPlan} />
+                <WhatWillChangeDisplay audit={observedAudit} hasActions={!!(fixLibrary?.fixes?.length || treatmentPlan?.prescriptions?.length)} />
+                <ProofItWorkedDisplay />
+              </div>
+            </section>
+
+            <section className="space-y-4">
+              <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 space-y-2">
+                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">
+                  Deeper Visibility Signals
+                </p>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">
+                  See what AI systems are reacting to
+                </h3>
+                <p className="text-sm text-slate-600 max-w-3xl">
+                  Use these panels to understand which signals support trust, what content AI can reuse, and where your page still looks weak.
+                </p>
+              </div>
+              <SignalCoverageDisplay extractionData={lastExtractionData} />
+              <BridgeNarrativeDisplay extractionData={lastExtractionData} audit={observedAudit} />
+              <CitationHealthDisplay extractionData={lastExtractionData} />
+              <WhatLLMsSeeDisplay extractionData={lastExtractionData} />
+              <HeresWhyDisplay extractionData={lastExtractionData} audit={observedAudit} />
+            </section>
+
+            <section className="space-y-4">
+              <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 space-y-2">
+                <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.3em]">
+                  Implementation Assets
+                </p>
+                <h3 className="text-2xl font-black uppercase tracking-tighter text-slate-900">
+                  Turn recommendations into live fixes
+                </h3>
+                <p className="text-sm text-slate-600 max-w-3xl">
+                  Export assets, review fix guidance, and validate outcomes so improvements are easier to implement and measure.
+                </p>
+              </div>
             <SchemaExportCard
               extractionData={lastExtractionData}
               subjectName={observedAudit?.summary?.subjectName}
@@ -648,13 +715,37 @@ const App: React.FC = () => {
                 }
               }}
             />
+            </section>
 
             <div className="bg-white border border-slate-200 rounded-[2.5rem] p-8 space-y-4">
-              <h4 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.3em]">Compare with Competitor</h4>
+              <div className="space-y-2">
+                <p className="text-[11px] font-black text-indigo-600 uppercase tracking-[0.3em]">Competitor Gap Analysis</p>
+                <h4 className="text-2xl font-black uppercase tracking-tighter text-slate-900">See where a competitor is outranking you in AI answers</h4>
+                <p className="text-sm text-slate-600 max-w-3xl">
+                  Compare your domain with a competitor to uncover where they have stronger trust, citation, and visibility signals, and where you can win back share fastest.
+                </p>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">You will get</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">A clearer visibility gap</p>
+                  <p className="mt-1 text-xs text-slate-600">See where the competitor looks more trustworthy or easier for AI to cite.</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">You will get</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">A smarter displacement path</p>
+                  <p className="mt-1 text-xs text-slate-600">Use the comparison to decide which fixes are most likely to beat competing pages.</p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">You will get</p>
+                  <p className="mt-2 text-sm font-semibold text-slate-900">Better prioritization</p>
+                  <p className="mt-1 text-xs text-slate-600">Focus effort where the competitive payoff is highest instead of fixing everything at once.</p>
+                </div>
+              </div>
               <div className="flex gap-4 flex-wrap">
                 <input
                   type="url"
-                  placeholder="Competitor URL (e.g. https://example.com)"
+                  placeholder="Competitor URL to benchmark against (e.g. https://example.com)"
                   value={competitorUrl}
                   onChange={(e) => setCompetitorUrl(e.target.value)}
                   className="flex-1 min-w-[200px] px-4 py-3 rounded-xl border border-slate-200 text-sm font-medium text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
@@ -664,9 +755,12 @@ const App: React.FC = () => {
                   disabled={isCompetitiveLoading || !competitorUrl.trim()}
                   className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-300 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all"
                 >
-                  {isCompetitiveLoading ? 'Analyzing...' : 'Compare'}
+                  {isCompetitiveLoading ? 'Finding the gap...' : 'Find the gap'}
                 </button>
               </div>
+              <p className="text-xs text-slate-500">
+                Best for high-intent competitors your customer might choose instead of you.
+              </p>
             </div>
 
             {treatmentPlan && (
