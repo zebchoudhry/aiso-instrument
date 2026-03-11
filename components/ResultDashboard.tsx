@@ -347,6 +347,22 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
       <SurfaceCard className="p-6">
       <div className="flex flex-wrap gap-4 justify-between items-center">
         <div className="flex flex-wrap gap-3">
+          {onViewRoadmap && (
+            <button
+              onClick={onViewRoadmap}
+              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+            >
+              View Roadmap
+            </button>
+          )}
+          {!onViewRoadmap && auditId && (
+            <Link
+              to={`/roadmap/${auditId}`}
+              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+            >
+              View Roadmap
+            </Link>
+          )}
           {onDownloadReport && (
             <button
               onClick={onDownloadReport}
@@ -378,22 +394,6 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
                 'Run Before/After Check'
               )}
             </button>
-          )}
-          {onViewRoadmap && (
-            <button
-              onClick={onViewRoadmap}
-              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
-            >
-              View Roadmap
-            </button>
-          )}
-          {!onViewRoadmap && auditId && (
-            <Link
-              to={`/roadmap/${auditId}`}
-              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
-            >
-              View Roadmap
-            </Link>
           )}
         </div>
         <button onClick={onReset} className="py-4 text-[11px] font-black text-slate-400 hover:text-slate-900 uppercase tracking-[0.4em] transition-all">

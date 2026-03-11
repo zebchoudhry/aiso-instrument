@@ -475,6 +475,41 @@ const App: React.FC = () => {
     }
   };
 
+  const handleViewRoadmap = () => {
+    if (!observedAudit) {
+      setErrorMessage('Run an audit first to build your roadmap.');
+      return;
+    }
+
+    const roadmapState = {
+      auditResult: observedAudit,
+      extractionData: lastExtractionData,
+      queryPackQueries: queryPack?.queries ?? [],
+      url: observedAudit.summary.url ?? '',
+      name: observedAudit.summary.subjectName ?? '',
+      fixLibrary: fixLibrary ?? null,
+      findings: observedAudit.keyFindings ?? [],
+    };
+
+    if (lastExtractionData) {
+      navigate(lastAuditId ? `/roadmap/${lastAuditId}` : '/roadmap', {
+        state: roadmapState,
+      });
+      return;
+    }
+
+    if (lastAuditId) {
+      navigate(`/roadmap/${lastAuditId}`, {
+        state: roadmapState,
+      });
+      return;
+    }
+
+    setErrorMessage(
+      'Your roadmap data is still preparing. Please wait a moment and try again.'
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <nav className="sticky top-0 z-40 border-b border-slate-200/70 bg-white/85 backdrop-blur">
@@ -587,20 +622,7 @@ const App: React.FC = () => {
           <ResultDashboard
             observed={observedAudit}
             auditId={lastAuditId}
-            onViewRoadmap={() => {
-              if (!observedAudit || !lastExtractionData) return;
-              navigate('/roadmap', {
-                state: {
-                  auditResult: observedAudit,
-                  extractionData: lastExtractionData,
-                  queryPackQueries: queryPack?.queries ?? [],
-                  url: observedAudit.summary.url ?? '',
-                  name: observedAudit.summary.subjectName ?? '',
-                  fixLibrary: fixLibrary ?? null,
-                  findings: observedAudit.keyFindings ?? [],
-                },
-              });
-            }}
+            onViewRoadmap={handleViewRoadmap}
             onReset={handleReset}
             onReAudit={async () => {
               if (!observedAudit) return;
