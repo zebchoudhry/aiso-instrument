@@ -12,7 +12,13 @@ import Roadmap from './pages/Roadmap.tsx';
 import Trends from './pages/Trends.tsx';
 import { AuthProvider, useAuth } from './context/AuthContext.tsx';
 
-function RequireAdmin({ children }: { children: JSX.Element }) {
+function RequireAdmin({ children }: { children: React.ReactElement }) {
+  const auth = useAuth();
+  if (!auth?.isConfigured) return children;
+  if (auth.loading) return <div className="min-h-screen bg-slate-50 p-8 text-center">Loading...</div>;
+  if (!auth.user) return <Navigate to="/" replace />;
+  const role = (auth.user as { role?: string }).role;
+  if (role !== 'admin' && role !== 'auditor') return <Navigate to="/" replace />;
   return children;
 }
 

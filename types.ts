@@ -390,3 +390,69 @@ export interface AIAnswerTestResponse {
   results: AIAnswerTestResult[];
   summary: AIAnswerTestSummary;
 }
+
+export interface MonitorRecord {
+  id: string;
+  domain: string;
+  url: string;
+  displayName: string;
+  ownerEmail?: string;
+  cadence: 'manual' | 'monthly' | 'weekly';
+  status: 'active' | 'paused';
+  /** Run id (monitor_runs.id) used as baseline for delta calculations */
+  baselineRunId?: string | null;
+  /** Run id (monitor_runs.id) of the most recent successful run */
+  latestRunId?: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface MonitorRunSummary {
+  /** monitor_runs.id */
+  id: string;
+  /** audits.id - use for report links (/report/:auditId) */
+  auditId: string | null;
+  createdAt: string;
+  url: string;
+  name: string;
+  overallScore: number;
+  aiVisibility: number;
+  citationLikelihood: number;
+  answerEngineReadiness: number;
+  entityClarity: number | null;
+  structuralSignals: number | null;
+  answerReuse: number | null;
+  trustSignals: number | null;
+  mentionRate: number | null;
+  citationRate: number | null;
+  findingCount: number;
+  topFinding: string | null;
+  triggerType?: 'initial_audit' | 'manual_check' | 'scheduled_check';
+  status?: 'queued' | 'running' | 'succeeded' | 'failed';
+}
+
+export interface MonitorDeltaSummary {
+  latestScore: number | null;
+  previousScore: number | null;
+  baselineScore: number | null;
+  changeVsPrevious: number | null;
+  changeVsBaseline: number | null;
+  latestMentionRate: number | null;
+  latestCitationRate: number | null;
+  runCount: number;
+  lastCheckedAt: string | null;
+}
+
+export interface MonitorMonthlySummary {
+  headline: string;
+  biggestImprovement: string;
+  biggestRegression: string;
+  topRecommendedAction: string;
+}
+
+export interface MonitorDetailResponse {
+  monitor: MonitorRecord | null;
+  runs: MonitorRunSummary[];
+  summary: MonitorDeltaSummary;
+  monthlySummary: MonitorMonthlySummary;
+}

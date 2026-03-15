@@ -20,7 +20,9 @@ import type {
   QueryPackResponse,
   FixLibraryResponse,
   ClientTranslationResponse,
-  DeepSynthesis
+  DeepSynthesis,
+  AIAnswerTestResponse,
+  AIAnswerTestResult,
 } from '../types.js';
 
 const HEURISTIC_VERSION = '5.1';
@@ -530,4 +532,80 @@ export async function runGeminiAudit({
 }) {
   // Stub: full implementation would use Gemini with apiKey
   return null;
+}
+
+/** Run AI outcome test: for each query, simulate whether AI would mention/cite the brand. */
+export async function performAIOutcomeTest(
+  queries: string[],
+  brandName: string,
+  domain: string,
+  apiKey?: string
+): Promise<AIAnswerTestResponse | null> {
+  if (!queries?.length || !brandName || !domain) return null;
+  const geminiKey = apiKey ?? (typeof process !== 'undefined' && process.env?.GEMINI_API_KEY);
+  if (!geminiKey) return null;
+  try {
+    const ai = getGeminiClient(apiKey);
+    const prompt = `You simulate an AI assistant answering user queries. For each query below, assess whether a typical AI answer (e.g. from ChatGPT, Perplexity) would:
+1. MENTION the brand "${brandName}" (from ${domain}) - e.g. name it in the response
+2. CITE the brand - e.g. link to ${domain} or explicitly reference it as a source
+3. List any competing brands that might appear instead
+
+Queries:
+${queries.map((q, i) => `${i + 1}. ${q}`).join('\n')}
+
+Return JSON: { "results": [ { "query": "...", "brandMentioned": boolean, "brandCited": boolean, "competitors": string[] } ] }
+For each query, use the same order. Be realistic: most queries won't mention/cite unless highly relevant.`;
+
+    const response = await ai.models.generateContent({
+      model: GEMINI_MODEL,
+      contents: prompt,
+      config: {
+        responseMimeType: 'application/json',
+        responseSchema: {
+          type: Type.OBJECT,
+          required: ['results'],
+          properties: {
+            results: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                required: ['query', 'brandMentioned', 'brandCited', 'competitors'],
+                properties: {
+                  query: { type: Type.STRING },
+                  brandMentioned: { type: Type.BOOLEAN },
+                  brandCited: { type: Type.BOOLEAN },
+                  competitors: { type: Type.ARRAY, items: { type: Type.STRING } },
+                },
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const text = (response as { text?: string }).text ?? '';
+    const parsed = JSON.parse(text || '{"results":[]}');
+    const results: AIAnswerTestResult[] = (parsed.results ?? []).slice(0, queries.length).map(
+      (r: { query?: string; brandMentioned?: boolean; brandCited?: boolean; competitors?: string[] }, i: number) => ({
+        query: r.query ?? queries[i] ?? '',
+        brandMentioned: Boolean(r.brandMentioned),
+        brandCited: Boolean(r.brandCited),
+        competitors: Array.isArray(r.competitors) ? r.competitors : [],
+      })
+    );
+    const mentionCount = results.filter((r) => r.brandMentioned).length;
+    const citeCount = results.filter((r) => r.brandCited).length;
+    return {
+      results,
+      summary: {
+        queriesTested: results.length,
+        brandMentionRate: results.length ? mentionCount / results.length : 0,
+        brandCitationRate: results.length ? citeCount / results.length : 0,
+      },
+    };
+  } catch (err) {
+    console.warn('[geminiService] performAIOutcomeTest error:', err);
+    return null;
+  }
 }

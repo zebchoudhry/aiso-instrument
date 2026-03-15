@@ -83,7 +83,7 @@ export class ExtractionService {
       });
       
       // Detect entity name from various sources
-      const subjectName = this.detectEntityName($, structuredData, title);
+      const subjectName = this.detectEntityName($, structuredData, title, url);
       
       // Identify errors
       const errors: string[] = [];
@@ -113,7 +113,7 @@ export class ExtractionService {
     }
   }
   
-  private static detectEntityName($: cheerio.CheerioAPI, structuredData: any[], title: string): string {
+  private static detectEntityName($: cheerio.CheerioAPI, structuredData: any[], title: string, requestUrl?: string): string {
     // Try Schema.org Organization name
     for (const schema of structuredData) {
       if (schema['@type'] === 'Organization' && schema.name) {
@@ -128,14 +128,33 @@ export class ExtractionService {
     const ogSiteName = $('meta[property="og:site_name"]').attr('content');
     if (ogSiteName) return ogSiteName;
     
-    // Fallback to domain extraction
-    const domain = new URL($('link[rel="canonical"]').attr('href') || '').hostname || '';
-    if (domain) {
-      return domain.replace('www.', '').split('.')[0];
+    // Fallback to domain extraction: use canonical only if present and valid
+    const canonicalHref = $('link[rel="canonical"]').attr('href');
+    if (typeof canonicalHref === 'string' && canonicalHref.trim() !== '') {
+      try {
+        const domain = new URL(canonicalHref).hostname || '';
+        if (domain) {
+          return domain.replace(/^www\./i, '').split('.')[0];
+        }
+      } catch {
+        // Malformed canonical; fall through to requestUrl or title
+      }
+    }
+    
+    // Use request URL hostname when canonical is missing or invalid
+    if (requestUrl && typeof requestUrl === 'string' && requestUrl.trim() !== '') {
+      try {
+        const domain = new URL(requestUrl).hostname || '';
+        if (domain) {
+          return domain.replace(/^www\./i, '').split('.')[0];
+        }
+      } catch {
+        // Fall through to title
+      }
     }
     
     // Last resort: first part of title
-    return title.split(/[|-]/)[0].trim();
+    return title.split(/[|-]/)[0].trim() || 'Unknown';
   }
   
   private static calculatePropositionalDensity(content: string): number {

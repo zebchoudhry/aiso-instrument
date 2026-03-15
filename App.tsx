@@ -28,7 +28,7 @@ import WhatWillChangeDisplay from './components/WhatWillChangeDisplay';
 import ProofItWorkedDisplay from './components/ProofItWorkedDisplay';
 import CitationIQLogo from './components/CitationIQLogo';
 
-import type { AIAnswerTestResponse } from './types';
+import type { AIAnswerTestResponse, MonitorDetailResponse } from './types';
 import {
   AuditResponse,
   UserRole,
@@ -118,6 +118,9 @@ const App: React.FC = () => {
   const [queryPackVerifications, setQueryPackVerifications] = useState<Array<{ query: string; result: string | null; pastedResponse?: string }>>([]);
   const [aiOutcomeResults, setAiOutcomeResults] = useState<AIAnswerTestResponse | null>(null);
   const [aiOutcomeLoading, setAiOutcomeLoading] = useState(false);
+  const [lastAuditContactEmail, setLastAuditContactEmail] = useState('');
+  const [monitorDetail, setMonitorDetail] = useState<MonitorDetailResponse | null>(null);
+  const [isMonitorLoading, setIsMonitorLoading] = useState(false);
 
   const auditDiagnosis = useMemo(() => {
     if (!observedAudit || !lastExtractionData) return null;
@@ -138,6 +141,20 @@ const App: React.FC = () => {
       .catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const url = observedAudit?.summary?.url;
+    if (!url) {
+      setMonitorDetail(null);
+      return;
+    }
+
+    const domain = getHostname(url);
+    fetch(`/api/monitors?domain=${encodeURIComponent(domain)}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error('Failed to load monitor'))))
+      .then((data) => setMonitorDetail(data))
+      .catch(() => setMonitorDetail(null));
+  }, [observedAudit?.summary?.url]);
+
   /** ----------------------------------------
    *  CORE AUDIT PIPELINE (SAFE)
    *  --------------------------------------*/
@@ -145,6 +162,8 @@ const App: React.FC = () => {
     setIsLoading(true);
     setErrorMessage(null);
     setObservedAudit(null);
+    setMonitorDetail(null);
+    setLastAuditContactEmail(email);
 
     try {
       setLoadingStage('Harvesting live website signals…');
@@ -305,6 +324,8 @@ const App: React.FC = () => {
     setErrorMessage(null);
     setObservedAudit(null);
     setUsePasteFallback(false);
+    setMonitorDetail(null);
+    setLastAuditContactEmail(email);
 
     try {
       setLoadingStage('Processing pasted HTML…');
@@ -450,6 +471,8 @@ const App: React.FC = () => {
     setErrorMessage(null);
     setUsePasteFallback(false);
     setAiOutcomeResults(null);
+    setLastAuditContactEmail('');
+    setMonitorDetail(null);
   };
 
   const handleCompetitiveCompare = async () => {
@@ -508,6 +531,49 @@ const App: React.FC = () => {
     setErrorMessage(
       'Your roadmap data is still preparing. Please wait a moment and try again.'
     );
+  };
+
+  const handleEnrollMonitoring = async () => {
+    if (!observedAudit) {
+      setErrorMessage('Run an audit first before enabling monitoring.');
+      return;
+    }
+
+    setIsMonitorLoading(true);
+    setErrorMessage(null);
+    try {
+      const response = await fetch('/api/monitors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'enroll',
+          auditId: lastAuditId,
+          url: observedAudit.summary.url,
+          name: observedAudit.summary.subjectName ?? '',
+          ownerEmail: lastAuditContactEmail || undefined,
+          cadence: 'monthly',
+        }),
+      });
+      if (!response.ok) {
+        const errorBody = await response.json().catch(() => ({}));
+        throw new Error(errorBody?.details ?? errorBody?.error ?? 'Failed to enable monitoring');
+      }
+      const detail: MonitorDetailResponse = await response.json();
+      setMonitorDetail(detail);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : 'Failed to enable monitoring');
+    } finally {
+      setIsMonitorLoading(false);
+    }
+  };
+
+  const handleViewMonitoring = () => {
+    const domain = observedAudit?.summary?.url ? getHostname(observedAudit.summary.url) : '';
+    if (!domain) {
+      setErrorMessage('A valid domain is required to open monitoring.');
+      return;
+    }
+    navigate(`/trends?domain=${encodeURIComponent(domain)}`);
   };
 
   return (
@@ -623,6 +689,10 @@ const App: React.FC = () => {
             observed={observedAudit}
             auditId={lastAuditId}
             onViewRoadmap={handleViewRoadmap}
+            onEnrollMonitoring={handleEnrollMonitoring}
+            onViewMonitoring={monitorDetail?.monitor ? handleViewMonitoring : undefined}
+            isMonitoringEnrolling={isMonitorLoading}
+            isMonitorEnabled={!!monitorDetail?.monitor}
             onReset={handleReset}
             onReAudit={async () => {
               if (!observedAudit) return;

@@ -15,6 +15,10 @@ interface ResultDashboardProps {
   onReset: () => void;
   onDownloadReport?: () => void;
   onReAudit?: () => void;
+  onEnrollMonitoring?: () => void;
+  onViewMonitoring?: () => void;
+  isMonitoringEnrolling?: boolean;
+  isMonitorEnabled?: boolean;
   isReAuditing?: boolean;
   deepSynthesis?: DeepSynthesis | null;
   isSynthesizing?: boolean;
@@ -44,6 +48,10 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
   onReset,
   onDownloadReport,
   onReAudit,
+  onEnrollMonitoring,
+  onViewMonitoring,
+  isMonitoringEnrolling = false,
+  isMonitorEnabled = false,
   isReAuditing = false,
   deepSynthesis = null,
   isSynthesizing = false,
@@ -363,6 +371,22 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
               View Roadmap
             </Link>
           )}
+          {isMonitorEnabled ? (
+            <button
+              onClick={onViewMonitoring}
+              className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+            >
+              View Monitoring
+            </button>
+          ) : onEnrollMonitoring ? (
+            <button
+              onClick={onEnrollMonitoring}
+              disabled={isMonitoringEnrolling}
+              className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+            >
+              {isMonitoringEnrolling ? 'Enabling Monitoring...' : 'Enable Monthly Monitoring'}
+            </button>
+          ) : null}
           {onDownloadReport && (
             <button
               onClick={onDownloadReport}

@@ -92,6 +92,20 @@ AISO Engine - Clinical AI Visibility Diagnostic
   }
 
   /**
+   * Generates a PDF from the report and triggers a browser download.
+   * @param report - The diagnostic report (must have audit)
+   */
+  static downloadPDF(report: DiagnosticReport): void {
+    const blob = this.generatePdf(report.audit);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `citationiq-report-${Date.now()}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  /**
    * Generates a PDF report from audit results
    */
   static generatePdf(
