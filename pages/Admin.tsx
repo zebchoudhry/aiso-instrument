@@ -42,6 +42,12 @@ export default function Admin() {
   const [loadingMonitors, setLoadingMonitors] = useState(true);
   const [loadingAlerts, setLoadingAlerts] = useState(false);
   const [runningDomain, setRunningDomain] = useState<string | null>(null);
+  const [enrollAuditId, setEnrollAuditId] = useState('');
+  const [enrollUrl, setEnrollUrl] = useState('');
+  const [enrollName, setEnrollName] = useState('');
+  const [enrollCadence, setEnrollCadence] = useState<'manual' | 'monthly' | 'weekly'>('monthly');
+  const [enrolling, setEnrolling] = useState(false);
+  const [enrollError, setEnrollError] = useState<string | null>(null);
 
   const loadAudits = () => {
     setLoadingAudits(true);
@@ -120,6 +126,41 @@ export default function Admin() {
       console.error(error);
     } finally {
       setRunningDomain(null);
+    }
+  };
+
+  const handleEnroll = async () => {
+    setEnrollError(null);
+    const auditId = enrollAuditId.trim() || undefined;
+    const url = enrollUrl.trim() || undefined;
+    const name = enrollName.trim() || undefined;
+    if (!auditId && !url) {
+      setEnrollError('Select an audit or enter a URL to enroll.');
+      return;
+    }
+    setEnrolling(true);
+    try {
+      const body: Record<string, unknown> = { action: 'enroll', cadence: enrollCadence };
+      if (auditId) body.auditId = auditId;
+      if (url) body.url = url;
+      if (name) body.name = name;
+      const response = await fetch('/api/monitors', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) {
+        const data = await response.json().catch(() => ({}));
+        throw new Error((data as { error?: string }).error ?? response.statusText);
+      }
+      setEnrollAuditId('');
+      setEnrollUrl('');
+      setEnrollName('');
+      await Promise.all([loadMonitors(), loadAudits(), loadRuns()]);
+    } catch (err) {
+      setEnrollError(err instanceof Error ? err.message : 'Enroll failed');
+    } finally {
+      setEnrolling(false);
     }
   };
 
@@ -212,12 +253,75 @@ export default function Admin() {
           <SurfaceCard tone="light" className="rounded-[2rem] p-6 md:p-8">
             {loadingMonitors ? (
               <div className="py-16 text-center text-slate-500">Loading monitoring portfolio...</div>
-            ) : monitors.length === 0 ? (
-              <div className="py-16 text-center text-slate-500">
-                No domains enrolled yet. Run an audit, then click `Enable Monthly Monitoring`.
-              </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-6">
+                <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50/50 p-5">
+                  <p className="mb-3 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500">Enroll a domain</p>
+                  <div className="flex flex-wrap items-end gap-4">
+                    <div className="min-w-[200px]">
+                      <label className="mb-1 block text-xs font-medium text-slate-600">From existing audit</label>
+                      <select
+                        value={enrollAuditId}
+                        onChange={(e) => setEnrollAuditId(e.target.value)}
+                        className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700"
+                      >
+                        <option value="">— or enter URL below —</option>
+                        {audits.map((a) => (
+                          <option key={a.id} value={a.id}>
+                            {a.name || a.url}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="min-w-[220px]">
+                      <label className="mb-1 block text-xs font-medium text-slate-600">URL (if no audit)</label>
+                      <input
+                        type="url"
+                        value={enrollUrl}
+                        onChange={(e) => setEnrollUrl(e.target.value)}
+                        placeholder="https://example.com"
+                        className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700"
+                      />
+                    </div>
+                    <div className="min-w-[140px]">
+                      <label className="mb-1 block text-xs font-medium text-slate-600">Display name</label>
+                      <input
+                        type="text"
+                        value={enrollName}
+                        onChange={(e) => setEnrollName(e.target.value)}
+                        placeholder="Optional"
+                        className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700"
+                      />
+                    </div>
+                    <div className="min-w-[120px]">
+                      <label className="mb-1 block text-xs font-medium text-slate-600">Cadence</label>
+                      <select
+                        value={enrollCadence}
+                        onChange={(e) => setEnrollCadence(e.target.value as 'manual' | 'monthly' | 'weekly')}
+                        className="w-full rounded-xl border border-slate-200 px-4 py-2 text-sm text-slate-700"
+                      >
+                        <option value="manual">Manual</option>
+                        <option value="monthly">Monthly</option>
+                        <option value="weekly">Weekly</option>
+                      </select>
+                    </div>
+                    <button
+                      onClick={handleEnroll}
+                      disabled={enrolling || (!enrollAuditId.trim() && !enrollUrl.trim())}
+                      className="rounded-xl bg-indigo-600 px-5 py-2.5 text-[10px] font-black uppercase tracking-[0.2em] text-white hover:bg-indigo-500 disabled:bg-slate-300"
+                    >
+                      {enrolling ? 'Enrolling...' : 'Enable Monthly Monitoring'}
+                    </button>
+                  </div>
+                  {enrollError && <p className="mt-3 text-sm text-rose-600">{enrollError}</p>}
+                </div>
+
+                {monitors.length === 0 ? (
+                  <div className="py-12 text-center text-slate-500">
+                    No domains enrolled yet. Run an audit, then use the form above to enroll, or enter a URL and click Enable Monthly Monitoring.
+                  </div>
+                ) : (
+                  <div className="space-y-4">
                 <div className="flex flex-wrap gap-4 pb-4">
                   <select
                     value={monitorFilter}
@@ -298,6 +402,8 @@ export default function Admin() {
                     </div>
                   );
                 })}
+              </div>
+                )}
               </div>
             )}
           </SurfaceCard>
