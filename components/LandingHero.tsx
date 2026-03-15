@@ -15,7 +15,7 @@ export default function LandingHero() {
           Find What Is Stopping AI From Recommending Your Brand
         </h1>
         <p className="mx-auto mt-7 max-w-3xl text-lg leading-8 text-slate-200 md:text-xl">
-          CitationIQ shows why AI systems overlook you, where competitors have the edge, and which fixes are most likely to improve visibility fastest.
+          Visus shows why AI systems overlook you, where competitors have the edge, and which fixes are most likely to improve visibility fastest.
         </p>
         <div className="mt-10 flex flex-wrap items-center justify-center gap-3 text-sm font-semibold text-slate-100 md:gap-4">
           <span className="rounded-full border border-white/10 bg-white/5 px-5 py-2.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.08)] backdrop-blur-sm">

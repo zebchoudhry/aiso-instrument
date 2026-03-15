@@ -7,28 +7,14 @@ interface CitationIQLogoProps {
   className?: string;
 }
 
-const SIZES = {
-  sm: {
-    icon: 'w-9 h-9',
-    wordmark: 'text-lg',
-    gap: 'gap-2.5',
-  },
-  md: {
-    icon: 'w-14 h-14',
-    wordmark: 'text-2xl',
-    gap: 'gap-3',
-  },
-  lg: {
-    icon: 'w-20 h-20',
-    wordmark: 'text-4xl',
-    gap: 'gap-4',
-  },
-  xl: {
-    icon: 'w-24 h-24 md:w-28 md:h-28',
-    wordmark: 'text-[2.5rem] md:text-[3.2rem]',
-    gap: 'gap-5',
-  },
+const WORDMARK_SIZES = {
+  sm: 'text-[18px]',
+  md: 'text-[24px]',
+  lg: 'text-[48px]',
+  xl: 'text-[56px]',
 } as const;
+
+const showTagline = (size: 'sm' | 'md' | 'lg' | 'xl') => size === 'lg' || size === 'xl';
 
 export default function CitationIQLogo({
   showWordmark = true,
@@ -36,72 +22,66 @@ export default function CitationIQLogo({
   size = 'md',
   className = '',
 }: CitationIQLogoProps) {
-  const palette =
-    theme === 'light'
-      ? {
-          primary: '#A5B4FC',
-          secondary: '#818CF8',
-          node: '#38BDF8',
-          accent: '#FFFFFF',
-          text: 'text-white',
-          iq: 'text-indigo-300',
-          glow: 'drop-shadow-[0_0_12px_rgba(129,140,248,0.65)]',
-        }
-      : {
-          primary: '#4F46E5',
-          secondary: '#6366F1',
-          node: '#2563EB',
-          accent: '#7C83FF',
-          text: 'text-slate-900',
-          iq: 'text-indigo-600',
-          glow: 'drop-shadow-[0_0_8px_rgba(99,102,241,0.35)]',
-        };
+  const textColor = theme === 'light' ? 'text-white' : 'text-slate-900';
+  const underlineColor =
+    theme === 'light' ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.12)';
 
   return (
-    <div className={`inline-flex items-center ${SIZES[size].gap} ${className}`}>
-      <svg
-        viewBox="0 0 100 100"
-        className={`${SIZES[size].icon} ${palette.glow}`}
-        fill="none"
-        aria-hidden="true"
+    <>
+      <style>{`
+        @keyframes visusCylonBeam {
+          0% {
+            left: 100%;
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+          5% {
+            opacity: 1;
+          }
+          95% {
+            opacity: 1;
+          }
+          100% {
+            left: 0%;
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+        }
+      `}</style>
+      <div
+        className={`relative overflow-hidden inline-block ${textColor} ${className}`}
       >
-        <circle
-          cx="50"
-          cy="50"
-          r="34"
-          stroke={palette.primary}
-          strokeWidth="10"
-          strokeLinecap="round"
-          strokeDasharray="138 96"
-          transform="rotate(132 50 50)"
+        {showWordmark && (
+          <div className="inline-block">
+            <div
+              className={`font-medium tracking-[0.25em] uppercase ${WORDMARK_SIZES[size]}`}
+            >
+              VISUS
+            </div>
+            {showTagline(size) && (
+              <div className="mt-1 text-[10px] font-medium uppercase tracking-[0.2em] opacity-60">
+                AI VISIBILITY PLATFORM
+              </div>
+            )}
+          </div>
+        )}
+        <div
+          className="w-full h-px mt-1"
+          style={{ backgroundColor: underlineColor }}
         />
-        <circle
-          cx="50"
-          cy="50"
-          r="22"
-          stroke={palette.secondary}
-          strokeWidth="8"
-          strokeLinecap="round"
-          strokeDasharray="82 58"
-          transform="rotate(135 50 50)"
+        <div
+          className="absolute rounded-sm"
+          style={{
+            width: '60px',
+            height: '2px',
+            bottom: '1px',
+            background:
+              'linear-gradient(90deg, transparent 0%, #E24B4A 30%, #ff2a2a 50%, #E24B4A 70%, transparent 100%)',
+            boxShadow: '0 0 8px 2px rgba(226,75,74,0.7)',
+            animation: 'visusCylonBeam 5s ease-in-out infinite',
+          }}
         />
-        <path
-          d="M16 50H35"
-          stroke={palette.secondary}
-          strokeWidth="8"
-          strokeLinecap="round"
-        />
-        <circle cx="33" cy="28" r="4.5" fill={palette.node} />
-        <circle cx="30" cy="66" r="5.5" fill={palette.node} />
-        <circle cx="79" cy="34" r="6.5" fill={palette.accent} />
-      </svg>
-
-      {showWordmark && (
-        <div className={`font-black tracking-[-0.04em] ${palette.text} ${SIZES[size].wordmark}`}>
-          <span>Citation</span>
-          <span className={palette.iq}>IQ</span>
-        </div>
-      )}
-    </div>
+      </div>
+    </>
   );
 }

@@ -138,7 +138,7 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
         <SurfaceCard tone="soft" className="p-6">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="flex flex-col">
-            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">CitationIQ Analysis Progress</span>
+            <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest mb-1">Visus Analysis Progress</span>
             <span className="text-[8px] font-bold text-slate-400 uppercase">Turning raw signals into actions you can use...</span>
           </div>
           <div className="flex flex-wrap gap-3">
@@ -189,7 +189,7 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
 
           <div className="grid gap-4">
             <div className="flex flex-col items-center justify-center rounded-[2.5rem] border border-white/10 bg-white/5 p-8 text-center backdrop-blur-sm">
-             <span className="mb-4 text-[10px] font-black uppercase tracking-[0.4em] text-indigo-300">CitationIQ Visibility Score</span>
+             <span className="mb-4 text-[10px] font-black uppercase tracking-[0.4em] text-indigo-300">Visus Visibility Score</span>
              <div className="flex items-baseline space-x-2">
                 <span className="text-8xl font-black tracking-tighter text-white drop-shadow-lg">{readiness?.internal_ai_readiness_score ?? overallScore}</span>
                 <span className="text-2xl font-black text-slate-500">/100</span>
@@ -328,7 +328,7 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
         <SectionIntro
           label="Proof It Worked"
           title="Verify the before/after result"
-          description="After your changes go live, use CitationIQ to confirm score gains, reduced blockers, and stronger recommendation outcomes."
+          description="After your changes go live, use Visus to confirm score gains, reduced blockers, and stronger recommendation outcomes."
         />
         <div className="grid gap-4 md:grid-cols-3">
           <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 p-5">

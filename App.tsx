@@ -650,7 +650,7 @@ const App: React.FC = () => {
                 <div className="space-y-6">
                   <div className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(180deg,#ffffff_0%,#eef2ff_100%)] p-6 shadow-sm">
                     <p className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-600">
-                      Why teams use CitationIQ
+                      Why teams use Visus
                     </p>
                     <h3 className="mt-3 text-xl font-black uppercase tracking-tight text-slate-900">
                       Move from diagnosis to action faster
@@ -737,7 +737,7 @@ const App: React.FC = () => {
               const url = URL.createObjectURL(blob);
               const a = document.createElement('a');
               a.href = url;
-              a.download = `citationiq-report-${(observedAudit.summary?.subjectName ?? 'audit').replace(/\s+/g, '-')}-${Date.now()}.pdf`;
+              a.download = `visus-report-${(observedAudit.summary?.subjectName ?? 'audit').replace(/\s+/g, '-')}-${Date.now()}.pdf`;
               a.click();
               URL.revokeObjectURL(url);
             }}
@@ -765,7 +765,7 @@ const App: React.FC = () => {
                   Your fastest path to better AI visibility
                 </h3>
                 <p className="text-sm text-slate-600 max-w-3xl">
-                  Review what CitationIQ found, why it matters commercially, and which actions to prioritize first.
+                  Review what Visus found, why it matters commercially, and which actions to prioritize first.
                 </p>
               </div>
               <PlainLanguageVerdict audit={observedAudit} />

@@ -100,7 +100,7 @@ AISO Engine - Clinical AI Visibility Diagnostic
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `citationiq-report-${Date.now()}.pdf`;
+    a.download = `visus-report-${Date.now()}.pdf`;
     a.click();
     URL.revokeObjectURL(url);
   }
