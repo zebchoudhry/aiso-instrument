@@ -10,6 +10,7 @@ import Terms from './pages/Terms.tsx';
 import Privacy from './pages/Privacy.tsx';
 import Roadmap from './pages/Roadmap.tsx';
 import Trends from './pages/Trends.tsx';
+import Login from './pages/Login.tsx';
 import { AuthProvider, useAuth } from './context/AuthContext.tsx';
 
 function RequireAdmin({ children }: { children: React.ReactElement }) {
@@ -42,6 +43,7 @@ root.render(
               </RequireAdmin>
             }
           />
+          <Route path="/login" element={<Login />} />
           <Route path="/methodology" element={<Methodology />} />
           <Route path="/report/:id" element={<Report />} />
           <Route path="/terms" element={<Terms />} />

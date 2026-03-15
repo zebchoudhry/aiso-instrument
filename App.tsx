@@ -568,12 +568,7 @@ const App: React.FC = () => {
   };
 
   const handleViewMonitoring = () => {
-    const domain = observedAudit?.summary?.url ? getHostname(observedAudit.summary.url) : '';
-    if (!domain) {
-      setErrorMessage('A valid domain is required to open monitoring.');
-      return;
-    }
-    navigate(`/trends?domain=${encodeURIComponent(domain)}`);
+    navigate('/admin');
   };
 
   return (
@@ -586,6 +581,9 @@ const App: React.FC = () => {
           <div className="flex gap-6">
             <Link to="/methodology" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600">
               Methodology
+            </Link>
+            <Link to="/login" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600">
+              Sign In
             </Link>
             <Link to="/admin" className="text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:text-indigo-600">
               Admin
