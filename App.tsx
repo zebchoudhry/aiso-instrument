@@ -27,6 +27,7 @@ import WhyThisMattersDisplay from './components/WhyThisMattersDisplay';
 import WhatWillChangeDisplay from './components/WhatWillChangeDisplay';
 import ProofItWorkedDisplay from './components/ProofItWorkedDisplay';
 import CitationIQLogo from './components/CitationIQLogo';
+import { useAuth } from './context/AuthContext';
 
 import type { AIAnswerTestResponse, MonitorDetailResponse } from './types';
 import {
@@ -77,6 +78,7 @@ function getHostname(url: string): string {
 
 const App: React.FC = () => {
   const navigate = useNavigate();
+  const auth = useAuth();
   const [observedAudit, setObservedAudit] = useState<AuditResponse | null>(null);
   const [deepSynthesis, setDeepSynthesis] = useState<DeepSynthesis | null>(null);
   const [queryPack, setQueryPack] = useState<QueryPackResponse | null>(null);
@@ -659,7 +661,7 @@ const App: React.FC = () => {
                       Run a visibility audit, identify where competitors look stronger, and generate a roadmap your team can actually follow.
                     </p>
                   </div>
-                  <AuditHistory />
+                  {auth?.user && <AuditHistory />}
                 </div>
               </div>
 

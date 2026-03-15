@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 interface AuditRow {
   id: string;
@@ -10,16 +11,21 @@ interface AuditRow {
 }
 
 export default function AuditHistory() {
+  const auth = useAuth();
   const [audits, setAudits] = useState<AuditRow[]>([]);
   const [loading, setLoading] = useState(true);
 
+  if (!auth?.user) return null;
+
   useEffect(() => {
+    if (!auth?.user) return;
+    setLoading(true);
     fetch('/api/audits?limit=10')
       .then((r) => r.json())
       .then((d) => setAudits(d.audits ?? []))
       .catch(() => setAudits([]))
       .finally(() => setLoading(false));
-  }, []);
+  }, [auth?.user]);
 
   if (loading || audits.length === 0) return null;
 
