@@ -453,6 +453,8 @@ export interface MonitorMonthlySummary {
 export interface MonitorDetailResponse {
   monitor: MonitorRecord | null;
   runs: MonitorRunSummary[];
+  alerts: unknown[];
+  recentRun: MonitorRunSummary | null;
   summary: MonitorDeltaSummary;
   monthlySummary: MonitorMonthlySummary;
 }
