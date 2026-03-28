@@ -1,5 +1,5 @@
 import React from 'react';
-import CitationIQLogo from './CitationIQLogo';
+import VisusLogo from './VisusLogo';
 import { SectionIntro, SurfaceCard } from './VisualSystem';
 
 export interface CompetitiveGap {
@@ -58,7 +58,7 @@ const CompetitiveAnalysisOverlay: React.FC<CompetitiveAnalysisOverlayProps> = ({
         <div className="p-10 bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.22),transparent_32%),linear-gradient(180deg,#08112e_0%,#0b1537_60%,#0f172a_100%)] text-white border-b border-white/10">
           <div className="flex justify-between items-center">
             <div>
-              <CitationIQLogo theme="light" size="sm" />
+              <VisusLogo theme="light" size="sm" />
               <div className="mt-6">
                 <SectionIntro
                   label="Competitive Intelligence"

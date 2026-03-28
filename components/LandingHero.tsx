@@ -1,5 +1,5 @@
 import React from 'react';
-import CitationIQLogo from './CitationIQLogo';
+import VisusLogo from './VisusLogo';
 
 export default function LandingHero() {
   return (
@@ -10,7 +10,7 @@ export default function LandingHero() {
         <p className="mb-7 text-[11px] font-black uppercase tracking-[0.5em] text-indigo-200/85">
           AI Visibility Intelligence
         </p>
-        <CitationIQLogo theme="light" size="xl" className="justify-center" />
+        <VisusLogo theme="light" size="xl" className="justify-center" />
         <h1 className="mx-auto mt-10 max-w-4xl text-4xl font-black uppercase tracking-[-0.05em] text-white md:text-6xl lg:text-[4.6rem] lg:leading-[0.95]">
           Find What Is Stopping AI From Recommending Your Brand
         </h1>

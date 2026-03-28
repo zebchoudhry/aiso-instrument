@@ -19,9 +19,10 @@ const FixLibraryDisplay: React.FC<FixLibraryDisplayProps> = ({ data, isLoading }
       </div>
 
       {isLoading ? (
-        <div className="bg-white border border-slate-200 rounded-[2.5rem] p-20 flex flex-col items-center justify-center space-y-6">
-          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] animate-pulse">Drafting Remediation Blueprints...</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {[...Array(4)].map((_, i) => (
+            <div key={i} className="rounded-2xl bg-slate-100 animate-pulse h-48" />
+          ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { DeploymentChecklist } from '../types';
-import CitationIQLogo from './CitationIQLogo';
+import VisusLogo from './VisusLogo';
 import { SectionIntro } from './VisualSystem';
 
 interface DeploymentChecklistOverlayProps {
@@ -33,7 +33,7 @@ const DeploymentChecklistOverlay: React.FC<DeploymentChecklistOverlayProps> = ({
         <div className="p-10 bg-[radial-gradient(circle_at_top,rgba(16,185,129,0.28),transparent_32%),linear-gradient(180deg,#052e24_0%,#065f46_65%,#064e3b_100%)] text-white">
           <div className="flex justify-between items-start mb-6">
             <div>
-              <CitationIQLogo theme="light" size="sm" />
+              <VisusLogo theme="light" size="sm" />
             </div>
             <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"/></svg>

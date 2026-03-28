@@ -66,7 +66,7 @@ const AuditForm: React.FC<AuditFormProps> = ({
           }`}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-          Paste HTML
+          Manual Analysis
         </button>
       </div>
 
@@ -101,9 +101,6 @@ const AuditForm: React.FC<AuditFormProps> = ({
             value={url}
             onChange={e => setUrl(e.target.value)}
           />
-          <p className="text-xs text-slate-500">
-            Getting 403 or blocked? Use <button type="button" onClick={() => setMode('paste')} className="text-indigo-600 font-bold hover:underline">Paste HTML</button> instead.
-          </p>
         </div>
         
         <div className="space-y-2">
@@ -131,7 +128,7 @@ const AuditForm: React.FC<AuditFormProps> = ({
               : "bg-[linear-gradient(135deg,#4f46e5_0%,#6366f1_55%,#7c83ff_100%)] hover:brightness-105"
           }`}
         >
-          {isLoading ? "Running Visibility Audit..." : "Analyze My Site"}
+          {isLoading ? "Running Visibility Audit..." : "Run Free AI Visibility Audit"}
         </button>
         <p className="mt-4 text-center text-[10px] font-medium text-slate-500">
           You will get a clear diagnosis, prioritized fixes, and a roadmap you can verify.

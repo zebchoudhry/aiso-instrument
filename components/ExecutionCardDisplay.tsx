@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { PrescriptionExecutionCard } from '../types';
-import CitationIQLogo from './CitationIQLogo';
+import VisusLogo from './VisusLogo';
 
 interface ExecutionCardDisplayProps {
   card: PrescriptionExecutionCard;
@@ -28,7 +28,7 @@ const ExecutionCardDisplay: React.FC<ExecutionCardDisplayProps> = ({
     <div className="bg-white rounded-[3rem] border border-slate-200 shadow-xl overflow-hidden animate-in zoom-in-95 duration-700">
       <div className="bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.24),transparent_32%),linear-gradient(180deg,#08112e_0%,#0b1537_60%,#0f172a_100%)] text-white p-8 lg:p-12 flex flex-col lg:flex-row justify-between lg:items-center gap-8 border-b border-white/10">
         <div className="min-w-0 flex-1">
-          <CitationIQLogo theme="light" size="sm" />
+          <VisusLogo theme="light" size="sm" />
           <div className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.3em] mb-3">Protocol Execution Step</div>
           <h3 className="text-xl md:text-2xl lg:text-3xl font-black tracking-tight uppercase leading-tight break-all">
             {card.cardId}

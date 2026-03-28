@@ -1,6 +1,6 @@
 import React from 'react';
 
-interface CitationIQLogoProps {
+interface VisusLogoProps {
   showWordmark?: boolean;
   theme?: 'light' | 'dark';
   size?: 'sm' | 'md' | 'lg' | 'xl';
@@ -16,12 +16,12 @@ const WORDMARK_SIZES = {
 
 const showTagline = (size: 'sm' | 'md' | 'lg' | 'xl') => size === 'lg' || size === 'xl';
 
-export default function CitationIQLogo({
+export default function VisusLogo({
   showWordmark = true,
   theme = 'dark',
   size = 'md',
   className = '',
-}: CitationIQLogoProps) {
+}: VisusLogoProps) {
   const textColor = theme === 'light' ? 'text-white' : 'text-slate-900';
   const underlineColor =
     theme === 'light' ? 'rgba(255,255,255,0.12)' : 'rgba(15,23,42,0.12)';

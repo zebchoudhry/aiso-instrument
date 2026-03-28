@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { TechnicalHandoverArtifacts, FactualAnchoringAsset } from '../types';
-import CitationIQLogo from './CitationIQLogo';
+import VisusLogo from './VisusLogo';
 
 interface GeneratedSchema {
   type: string;
@@ -50,7 +50,7 @@ const RemediationOverlay: React.FC<RemediationOverlayProps> = ({ artifacts, fact
         
         <div className="p-8 border-b border-slate-800 flex justify-between items-center bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.20),transparent_32%),linear-gradient(180deg,#08112e_0%,#0f172a_100%)]">
           <div className="flex items-center space-x-4">
-            <CitationIQLogo theme="light" size="sm" />
+            <VisusLogo theme="light" size="sm" />
             <div className="flex space-x-1.5">
               <div className="w-3 h-3 rounded-full bg-rose-500/20 border border-rose-500/50"></div>
               <div className="w-3 h-3 rounded-full bg-amber-500/20 border border-amber-500/50"></div>

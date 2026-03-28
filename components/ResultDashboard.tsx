@@ -5,8 +5,9 @@ import ScoreCard from './ScoreCard';
 import AIOutcomePanel from './AIOutcomePanel';
 import InvisibilityDiagnosisPanel from './InvisibilityDiagnosisPanel';
 import { getPercentileLabel } from '../lib/benchmark';
-import CitationIQLogo from './CitationIQLogo';
+import VisusLogo from './VisusLogo';
 import { SectionIntro, SurfaceCard } from './VisualSystem';
+import { useAuth } from '../context/AuthContext';
 
 interface ResultDashboardProps {
   observed: AuditResponse | null;
@@ -19,6 +20,7 @@ interface ResultDashboardProps {
   onViewMonitoring?: () => void;
   isMonitoringEnrolling?: boolean;
   isMonitorEnabled?: boolean;
+  hasHowToFixAccess?: boolean;
   isReAuditing?: boolean;
   deepSynthesis?: DeepSynthesis | null;
   isSynthesizing?: boolean;
@@ -52,6 +54,7 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
   onViewMonitoring,
   isMonitoringEnrolling = false,
   isMonitorEnabled = false,
+  hasHowToFixAccess = false,
   isReAuditing = false,
   deepSynthesis = null,
   isSynthesizing = false,
@@ -64,6 +67,11 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
   diagnosis = null,
   children
 }) => {
+  const auth = useAuth();
+  const isAnonymous = !auth?.user;
+  // TODO: Replace monitor-existence check with subscription_status === 'active' when Stripe webhooks are live
+  const canAccessHowToFix = !isAnonymous && hasHowToFixAccess;
+
   if (!observed) return null;
 
   const [shareCopied, setShareCopied] = useState(false);
@@ -156,7 +164,7 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-2 lg:items-start">
           <div className="space-y-6">
             <div className="flex flex-col space-y-4">
-              <CitationIQLogo theme="light" size="md" />
+              <VisusLogo theme="light" size="md" />
               <div className="flex items-center space-x-2 opacity-70">
                  <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">{observed.summary.subjectName ?? observed.summary.url}</span>
               </div>
@@ -357,57 +365,67 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
         <div className="flex flex-wrap gap-3">
           {onViewRoadmap && (
             <button
-              onClick={onViewRoadmap}
-              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+              onClick={canAccessHowToFix ? onViewRoadmap : undefined}
+              disabled={!canAccessHowToFix}
+              className={`px-8 py-4 bg-violet-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${!canAccessHowToFix ? 'opacity-40 cursor-not-allowed' : 'hover:bg-violet-500'}`}
             >
               View Roadmap
             </button>
           )}
           {!onViewRoadmap && auditId && (
-            <Link
-              to={`/roadmap/${auditId}`}
-              className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
-            >
-              View Roadmap
-            </Link>
+            !canAccessHowToFix ? (
+              <span className="px-8 py-4 bg-violet-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest opacity-40 cursor-not-allowed inline-block">
+                View Roadmap
+              </span>
+            ) : (
+              <Link
+                to={`/roadmap/${auditId}`}
+                className="px-8 py-4 bg-violet-600 hover:bg-violet-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+              >
+                View Roadmap
+              </Link>
+            )
           )}
           {isMonitorEnabled ? (
             <button
-              onClick={onViewMonitoring}
-              className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+              onClick={isAnonymous ? undefined : onViewMonitoring}
+              disabled={isAnonymous}
+              className={`px-8 py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${isAnonymous ? 'opacity-40 cursor-not-allowed' : 'hover:bg-emerald-500'}`}
             >
               View Monitoring
             </button>
           ) : onEnrollMonitoring ? (
             <button
-              onClick={onEnrollMonitoring}
-              disabled={isMonitoringEnrolling}
-              className="px-8 py-4 bg-emerald-600 hover:bg-emerald-500 disabled:bg-slate-300 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm"
+              onClick={isAnonymous ? undefined : onEnrollMonitoring}
+              disabled={isMonitoringEnrolling || isAnonymous}
+              className={`px-8 py-4 bg-emerald-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${isAnonymous ? 'opacity-40 cursor-not-allowed' : 'hover:bg-emerald-500'} disabled:bg-slate-300`}
             >
               {isMonitoringEnrolling ? 'Enabling Monitoring...' : 'Enable Monthly Monitoring'}
             </button>
           ) : null}
           {onDownloadReport && (
             <button
-              onClick={onDownloadReport}
-              className="px-8 py-4 bg-[linear-gradient(135deg,#4f46e5_0%,#6366f1_55%,#7c83ff_100%)] hover:brightness-105 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_16px_34px_rgba(79,70,229,0.22)]"
+              onClick={canAccessHowToFix ? onDownloadReport : undefined}
+              disabled={!canAccessHowToFix}
+              className={`px-8 py-4 bg-[linear-gradient(135deg,#4f46e5_0%,#6366f1_55%,#7c83ff_100%)] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-[0_16px_34px_rgba(79,70,229,0.22)] ${!canAccessHowToFix ? 'opacity-40 cursor-not-allowed' : 'hover:brightness-105'}`}
             >
               Download Report (PDF)
             </button>
           )}
           {shareUrl && (
             <button
-              onClick={handleShare}
-              className="px-8 py-4 bg-slate-100 hover:bg-slate-200 text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all"
+              onClick={canAccessHowToFix ? handleShare : undefined}
+              disabled={!canAccessHowToFix}
+              className={`px-8 py-4 bg-slate-100 text-slate-900 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${!canAccessHowToFix ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-200'}`}
             >
               {shareCopied ? 'Link copied!' : 'Share Report Link'}
             </button>
           )}
           {onReAudit && (
             <button
-              onClick={onReAudit}
-              disabled={isReAuditing}
-              className="px-8 py-4 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-sm"
+              onClick={canAccessHowToFix ? onReAudit : undefined}
+              disabled={isReAuditing || !canAccessHowToFix}
+              className={`px-8 py-4 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all flex items-center gap-2 shadow-sm ${!canAccessHowToFix ? 'opacity-40 cursor-not-allowed' : 'hover:bg-slate-800'} disabled:bg-slate-400`}
             >
               {isReAuditing ? (
                 <>
@@ -424,6 +442,11 @@ const ResultDashboard: React.FC<ResultDashboardProps> = ({
           Start New Audit
         </button>
       </div>
+      {isAnonymous ? (
+        <p className="mt-3 text-sm text-slate-500">Sign in to access full features</p>
+      ) : !hasHowToFixAccess ? (
+        <p className="mt-3 text-sm text-slate-500">Enable monthly monitoring to unlock your fix library, roadmap, report download, and before/after checks.</p>
+      ) : null}
       </SurfaceCard>
     </div>
   );

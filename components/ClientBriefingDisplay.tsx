@@ -30,9 +30,17 @@ const ClientBriefingDisplay: React.FC<ClientBriefingDisplayProps> = ({ data, isL
       </header>
 
       {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center space-y-6">
-          <div className="w-12 h-12 border-4 border-slate-200 border-t-slate-900 rounded-full animate-spin"></div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] animate-pulse">Translating Diagnostics for Stakeholders...</p>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="rounded-2xl bg-slate-100 animate-pulse h-16" />
+            ))}
+          </div>
+          <div className="space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="rounded-2xl bg-slate-100 animate-pulse h-16" />
+            ))}
+          </div>
         </div>
       ) : (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-16">

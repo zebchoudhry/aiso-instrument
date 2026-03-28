@@ -15,7 +15,7 @@ const AIOutcomePanel: React.FC<AIOutcomePanelProps> = ({ results, summary, isLoa
         <SectionIntro
           label="AI Outcome Validation"
           title="Measure recommendation outcomes"
-          description="CitationIQ is running the AI outcome test across your saved query set."
+          description="Visus is running the AI outcome test across your saved query set."
         />
         <SurfaceCard className="flex flex-col items-center justify-center space-y-6 p-10 py-20">
           <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />

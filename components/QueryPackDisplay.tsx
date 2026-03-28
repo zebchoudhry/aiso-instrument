@@ -140,9 +140,10 @@ const QueryPackDisplay: React.FC<QueryPackDisplayProps> = ({
       </header>
 
       {isLoading ? (
-        <div className="py-20 flex flex-col items-center justify-center space-y-6">
-          <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.4em] animate-pulse">Synthesizing Human Intent Models...</p>
+        <div className="space-y-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="rounded-2xl bg-slate-100 animate-pulse h-24" />
+          ))}
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">

@@ -20,7 +20,7 @@ export default function InvisibilityDiagnosisPanel({
   return (
     <SurfaceCard className="p-8 space-y-6">
       <SectionIntro
-        label="CitationIQ Diagnosis"
+        label="Visus Diagnosis"
         title={title}
         description={diagnosis.summary}
       />

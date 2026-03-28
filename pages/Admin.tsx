@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import CitationIQLogo from '../components/CitationIQLogo';
+import VisusLogo from '../components/VisusLogo';
 import { SectionIntro, SurfaceCard } from '../components/VisualSystem';
 import type { MonitorDeltaSummary, MonitorMonthlySummary, MonitorRecord } from '../types';
 
@@ -197,7 +197,7 @@ export default function Admin() {
       <div className="mx-auto max-w-7xl space-y-8">
         <div className="flex flex-col gap-4 rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm md:flex-row md:items-center md:justify-between">
           <div className="space-y-4">
-            <CitationIQLogo size="sm" />
+            <VisusLogo size="sm" />
             <SectionIntro
               label="Admin"
               title="Monitoring dashboard"

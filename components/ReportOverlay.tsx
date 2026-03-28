@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { DiagnosticReport } from '../types';
 import { ReportService } from '../services/reportService';
-import CitationIQLogo from './CitationIQLogo';
+import VisusLogo from './VisusLogo';
 import { SectionIntro } from './VisualSystem';
 
 interface ReportOverlayProps {
@@ -31,7 +31,7 @@ const ReportOverlay: React.FC<ReportOverlayProps> = ({ report, onClose }) => {
       <div className="bg-white w-full max-w-lg rounded-[2.5rem] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-500">
         <div className="bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.28),transparent_32%),linear-gradient(180deg,#08112e_0%,#0b1537_60%,#0f172a_100%)] p-10 text-white">
           <div className="flex justify-between items-start mb-6">
-            <CitationIQLogo theme="light" size="sm" />
+            <VisusLogo theme="light" size="sm" />
             <button onClick={onClose} className="text-white/50 hover:text-white transition-colors">
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>

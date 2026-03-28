@@ -50,19 +50,16 @@ const PasteHtmlForm: React.FC<PasteHtmlFormProps> = ({ onAuditFromHtml, isLoadin
 
         <div className="space-y-2">
           <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest">
-            Paste Page HTML
+            Page Source
           </label>
           <textarea
             required
-            placeholder="Paste the full HTML source of the page (right-click → View Page Source → Copy all)"
+            placeholder="Paste your full page source here. In your browser: visit the site, right-click anywhere → View Page Source, select all, copy, paste here."
             rows={8}
             className="w-full px-5 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all text-sm shadow-inner font-mono text-xs"
             value={html}
             onChange={(e) => setHtml(e.target.value)}
           />
-          <p className="text-[9px] text-slate-400">
-            On your site: right-click → View Page Source → Ctrl+A → Ctrl+C, then paste above.
-          </p>
         </div>
 
         <div className="space-y-2">
@@ -90,9 +87,6 @@ const PasteHtmlForm: React.FC<PasteHtmlFormProps> = ({ onAuditFromHtml, isLoadin
         >
           {isLoading ? 'Running Diagnostic...' : 'Analyze Pasted HTML'}
         </button>
-        <p className="mt-4 text-[9px] text-slate-400 font-bold uppercase tracking-widest text-center">
-          * Use when our server cannot reach your URL directly.
-        </p>
       </div>
     </form>
   );
