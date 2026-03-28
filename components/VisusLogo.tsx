@@ -31,18 +31,18 @@ export default function VisusLogo({
       <style>{`
         @keyframes visusCylonBeam {
           0% {
-            left: 100%;
-            transform: translateX(-100%);
+            left: 0%;
+            transform: translateX(0);
             opacity: 0;
           }
-          5% {
+          8% {
             opacity: 1;
           }
-          95% {
+          92% {
             opacity: 1;
           }
           100% {
-            left: 0%;
+            left: 100%;
             transform: translateX(-100%);
             opacity: 0;
           }
@@ -78,7 +78,8 @@ export default function VisusLogo({
             background:
               'linear-gradient(90deg, transparent 0%, #E24B4A 30%, #ff2a2a 50%, #E24B4A 70%, transparent 100%)',
             boxShadow: '0 0 8px 2px rgba(226,75,74,0.7)',
-            animation: 'visusCylonBeam 5s ease-in-out infinite',
+            animation:
+              'visusCylonBeam 5s ease-in-out infinite alternate',
           }}
         />
       </div>
